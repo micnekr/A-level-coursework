@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html class="no-js" lang="">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>{{title}}</title>
+    <meta name="description" content="">
+    <meta name="viewport" content=
+    "width=device-width, initial-scale=1">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <!-- Place favicon.ico in the root directory -->
+</head>
+<body>
+    <!--[if lt IE 8]>
+        <p class="browserupgrade">
+            You are using an <strong>outdated</strong> browser. Please
+            <a href="http://browsehappy.com/">upgrade your browser</a> to improve
+            your experience.
+        </p>
+        <![endif]-->
+    <div id="_app"></div>
+    <!-- Scripts go here so that they are loaded at the end. -->
+    <!-- Load React -->
+    <script src=
+    "https://unpkg.com/react@18/umd/react.development.js"
+    crossorigin=""></script>
+    <script src=
+    "https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+    crossorigin=""></script> <!-- Import babel for JSX -->
+
+    <script src=
+    "https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script type="text/babel">
+
+     'use strict';
+
+     {{component}}
+
+     const domContainer = document.querySelector('#_app');
+     const root = ReactDOM.createRoot(domContainer);
+     root.render(React.createElement({{component_name}}));
+    </script>
+</body>
+</html>

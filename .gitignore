@@ -1,0 +1,8 @@
+/target
+
+.env
+
+ssl/*.pem
+
+public/pages
+!public/pages/.gitkeep
