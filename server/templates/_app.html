@@ -18,7 +18,12 @@
             your experience.
         </p>
         <![endif]-->
-    <div id="_app"></div>
+    <div id="_app"></div><!-- CSS -->
+    <link rel="stylesheet" href=
+    "https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css"
+    integrity=
+    "sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor"
+    crossorigin="anonymous">
     <!-- Scripts go here so that they are loaded at the end. -->
     <!-- Load React -->
     <script src=
@@ -30,15 +35,21 @@
 
     <script src=
     "https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src=
+    "https://unpkg.com/react-bootstrap@next/dist/react-bootstrap.min.js"
+    crossorigin=""></script>
+    <script type="text/javascript" src="js/zxcvbn.js"></script>
     <script type="text/babel">
 
-     'use strict';
 
+     'use strict';
+    {% for component in components %}
      {{component}}
+    {% endfor %}
 
      const domContainer = document.querySelector('#_app');
      const root = ReactDOM.createRoot(domContainer);
-     root.render(React.createElement({{component_name}}));
+     root.render(React.createElement({{page_component_name}}));
     </script>
 </body>
 </html>

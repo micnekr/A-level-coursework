@@ -3,30 +3,66 @@ use std::{fs, path::Path};
 use actix_web::{web, Resource};
 use askama::Template;
 
-use crate::settings::{ALLOWED_ORIGIN, PROTOCOL}; // bring trait in scope
-
 #[derive(Template)]
 #[template(path = "_app.html", escape = "none")]
 #[derive(Clone)]
 pub struct AppTemplate<'a> {
     title: &'a str,
-    component_name: &'a str,
-    component: String,
+    page_component_name: &'a str,
+    components: Vec<String>,
 }
 
-pub fn create_page(title: &'static str, path: &str, component_name: &'static str) -> Resource {
-    let code_path = format!("public/jsx/{}.jsx", component_name.to_lowercase());
-    let code_path = Path::new(code_path.as_str());
+/// Create the code for a page based on the components that need to be included
+pub fn create_page(
+    title: &'static str,
+    path: &str,
+    components: &'static [ReactElement],
+) -> Resource {
     let template = AppTemplate {
         title,
-        component_name,
-        component: fs::read_to_string(code_path).expect(&format!(
-            "Could not read jsx for component {}",
-            component_name
-        )),
+        page_component_name: components
+            .iter()
+            .find(|e| e.is_page())
+            .expect("No page element found")
+            .name(),
+        components: components.into_iter().map(|e| e.read_code()).collect(),
     };
     let template = Box::new(template);
     let template = Box::leak(template);
 
     web::resource(path).to(|| async { template.clone() })
+}
+
+/// A React element (component or a page) that needs to be imported to a page
+pub enum ReactElement<'a> {
+    COMPONENT(&'a str),
+    PAGE(&'a str),
+}
+
+impl<'a> ReactElement<'a> {
+    /// Returns the name of the element
+    fn name(&self) -> &str {
+        match self {
+            ReactElement::COMPONENT(e) => e,
+            ReactElement::PAGE(e) => e,
+        }
+    }
+
+    /// Determines whether a component is a page or not
+    fn is_page(&self) -> bool {
+        match self {
+            ReactElement::COMPONENT(_) => false,
+            ReactElement::PAGE(_) => true,
+        }
+    }
+
+    /// loads the code associated with this element
+    fn read_code(&self) -> String {
+        let path = match self {
+            ReactElement::COMPONENT(name) => format!("public/jsx/components/{}.jsx", name),
+            ReactElement::PAGE(name) => format!("public/jsx/pages/{}.jsx", name),
+        };
+
+        fs::read_to_string(&path).expect(&format!("Could not read jsx for {}", path))
+    }
 }

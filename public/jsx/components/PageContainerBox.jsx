@@ -1,0 +1,16 @@
+function PageContainerBox(props) {
+  const { children, title } = props;
+
+  return <div className="container-fluid vh-100 vw-100">
+    <div className="row justify-content-center  align-items-center h-100">
+      <div className="col-8 border rounded p-3">
+        {
+          title ?
+            <h2 className="mx-auto text-center">{title}</h2>
+            : null
+        }
+        {children}
+      </div>
+    </div>
+  </div>;
+}

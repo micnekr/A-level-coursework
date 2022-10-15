@@ -1,14 +1,14 @@
 use crate::{
-    data::users::{UnsavedUser, User},
+    data::users::UnsavedUser,
     db::establish_connection,
     page_template::create_page,
     settings::{ALLOWED_ORIGIN, PASSWORD_HASH_LENGTH},
 };
 use actix_cors::Cors;
-use actix_web::{get, http::header, middleware, App, HttpResponse, HttpServer, Responder};
-use diesel::prelude::*;
+use actix_web::{http::header, middleware, App, HttpServer};
 use dotenvy::dotenv;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
+use page_template::ReactElement;
 use std::env;
 
 pub mod data;
@@ -57,9 +57,25 @@ async fn main() -> std::io::Result<()> {
                     .max_age(3600)
                     .supports_credentials(), // Allow the cookie auth.
             )
-            .service(hello)
             .service(actix_files::Files::new("/css", "public/css").show_files_listing())
-            .service(create_page("Log in", "/login", "Login"))
+            .service(actix_files::Files::new("/js", "public/js").show_files_listing())
+            .service(create_page(
+                "Log in",
+                "/login",
+                &[
+                    ReactElement::PAGE("Login"),
+                    ReactElement::COMPONENT("PageContainerBox"),
+                ],
+            ))
+            .service(create_page(
+                "Sign up",
+                "/signup",
+                &[
+                    ReactElement::PAGE("Signup"),
+                    ReactElement::COMPONENT("PageContainerBox"),
+                    ReactElement::COMPONENT("PasswordStrength"),
+                ],
+            ))
     })
     .bind_openssl(ALLOWED_ORIGIN, ssl_builder)?;
 
@@ -80,9 +96,4 @@ async fn main() -> std::io::Result<()> {
     }
 
     server.run().await
-}
-
-#[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
 }
