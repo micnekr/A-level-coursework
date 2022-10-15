@@ -1,3 +1,5 @@
+/** A component that draws a box around the main content and centres it on the page
+ */
 function PageContainerBox(props) {
   const { children, title } = props;
 

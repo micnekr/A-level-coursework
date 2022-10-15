@@ -47,7 +47,9 @@ async fn main() -> std::io::Result<()> {
     // create the server
     let server = HttpServer::new(|| {
         App::new()
+            // Activate logger middleware
             .wrap(middleware::Logger::default())
+            // Set suitable CORS
             .wrap(
                 Cors::default()
                     .allowed_origin(ALLOWED_ORIGIN)
@@ -57,8 +59,10 @@ async fn main() -> std::io::Result<()> {
                     .max_age(3600)
                     .supports_credentials(), // Allow the cookie auth.
             )
+            // Serve the static css and js files
             .service(actix_files::Files::new("/css", "public/css").show_files_listing())
             .service(actix_files::Files::new("/js", "public/js").show_files_listing())
+            // Serve pages by constructing them out of their components
             .service(create_page(
                 "Log in",
                 "/login",
@@ -77,10 +81,10 @@ async fn main() -> std::io::Result<()> {
                 ],
             ))
     })
+    // set up openssl for use
     .bind_openssl(ALLOWED_ORIGIN, ssl_builder)?;
 
     // Main operation
-
     {
         // use self::schema::users::dsl::*;
         // let results = users.load::<User>(connection).expect("Error loading users");
