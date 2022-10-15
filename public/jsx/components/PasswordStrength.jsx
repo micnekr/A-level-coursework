@@ -1,19 +1,5 @@
-/** A component that represents a single bar in a PasswordStrength component
- */
-function PasswordStrengthBar(props){
-  const {children, color} = props;
-  // Pass on the additional classes
-  return <div
-           className={`col-2 rounded-pill border mx-1`}
-           style={{
-             height: "1rem",
-             backgroundColor: color
-           }}
-         />
-}
-
 /** A component that calculates password strength and
- * displays a number of bars proportional to the password strength
+ * displays a progress bar that represents the password strength
  */
 function PasswordStrength(props) {
   const { password} = props;
@@ -39,24 +25,25 @@ function PasswordStrength(props) {
 
   const bar_color = bar_colors[password_strength];
 
-  // Note that the number of highlighted bars is the same as the password strength
-  const total_bar_num = 5;
-  // Always highlight at least one bar. Note that password strength varies between 0 and 4 (inclusive)
-  const num_bars_highlighted = password_strength + 1;
-  const num_bars_not_highlighted = total_bar_num - num_bars_highlighted;
+  const total_bar_length = 5;
+  // Always show a little progress. Note that password strength varies between 0 and 4 (inclusive)
+  const length_highlighted = password_strength + 1;
 
   return <div className="container-fluid">
 
-           <div className="row justify-content-center mb-3">
-                {/* Create `password_strength` highlighted rows */}
-                {Array(num_bars_highlighted).fill().map((_, i) =>
-                    <PasswordStrengthBar key={i} color={bar_color}/>
-                )}
-
-                {/* Create the non-highlighted rows to get a total of `total_bar_num` */}
-                {Array(num_bars_not_highlighted).fill().map((_, i) =>
-                    <PasswordStrengthBar key={i}/>
-                )}
+           <div className="row mb-3">
+             <div className="col-auto ps-0 mb-2 mb-sm-0">Password strength: </div>
+             {/* The "outside" of the bar */}
+             <div className="col-sm rounded-pill border px-0 mx-auto align-self-center" style={{
+               height: "1rem"
+             }}>
+                {/* The colourful "inside" of the bar */}
+                <div className="h-100 rounded-pill" style={{
+                    backgroundColor: bar_color,
+                    // Calculate percentage width
+                    width: `${length_highlighted / total_bar_length * 100}%`
+                }}></div>
+             </div>
            </div>
             {
                 // if it an empty string, do not display it
