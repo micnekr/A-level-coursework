@@ -6,20 +6,30 @@ use crate::{
 };
 use actix_cors::Cors;
 use actix_web::{http::header, middleware, App, HttpServer};
+use diesel::PgConnection;
 use dotenvy::dotenv;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use page_template::ReactElement;
 use std::env;
+use std::sync::Mutex;
 
 pub mod data;
 pub mod db;
+pub mod endpoints;
 pub mod page_template;
 pub mod schema;
 pub mod settings;
 
+pub struct ServerState {
+    pub connection: Mutex<PgConnection>,
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // Startup
+    // Create a logger
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("debug"));
+
     // Find out the length of the hash in this representation
     let password_length = UnsavedUser::hash("")
         .expect("Failed to hash a test string")
@@ -28,10 +38,6 @@ async fn main() -> std::io::Result<()> {
 
     // Load the .env file
     dotenv().expect("Failed to load the .env file");
-
-    // Connect to the database using the URL in the .env file
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let connection = &mut establish_connection(database_url);
 
     // load TLS keys
     let mut ssl_builder = SslAcceptor::mozilla_intermediate(SslMethod::tls())
@@ -43,9 +49,16 @@ async fn main() -> std::io::Result<()> {
         .set_certificate_chain_file("ssl/cert.pem")
         .expect("Could not locate the cert.pem file");
 
-    // create the pages from the templates
     // create the server
     let server = HttpServer::new(|| {
+        // Connect to the database using the URL in the .env file
+        let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+        let connection = establish_connection(database_url);
+
+        let server_data = actix_web::web::Data::new(ServerState {
+            connection: Mutex::new(connection),
+        });
+
         App::new()
             // Activate logger middleware
             .wrap(middleware::Logger::default())
@@ -59,6 +72,11 @@ async fn main() -> std::io::Result<()> {
                     .max_age(3600)
                     .supports_credentials(), // Allow the cookie auth.
             )
+            // Server state
+            .app_data(server_data)
+            // endpoints
+            .service(endpoints::users::signup)
+            // Serving files
             // Serve the static css and js files
             .service(actix_files::Files::new("/css", "public/css").show_files_listing())
             .service(actix_files::Files::new("/js", "public/js").show_files_listing())
@@ -83,21 +101,6 @@ async fn main() -> std::io::Result<()> {
     })
     // set up openssl for use
     .bind_openssl(ALLOWED_ORIGIN, ssl_builder)?;
-
-    // Main operation
-    {
-        // use self::schema::users::dsl::*;
-        // let results = users.load::<User>(connection).expect("Error loading users");
-
-        // let new_user =
-        //     UnsavedUser::try_new(String::from("test user"), String::from("Test")).unwrap();
-        // println!("{}", new_user.password_hash.len());
-
-        // println!("Num results: {}", results.len());
-        // for (i, result) in results.iter().enumerate() {
-        //     println!("Result number {}: {:?}", i, result);
-        // }
-    }
 
     server.run().await
 }

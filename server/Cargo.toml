@@ -18,3 +18,6 @@ actix-cors = "0.6.3"
 askama = { version="0.11.1", features = ["with-actix-web"] }
 actix-files = "0.6.2"
 askama_actix = "0.13.0"
+env_logger = "0.9.1"
+log = "0.4.17"
+derive_more = "0.99.17"

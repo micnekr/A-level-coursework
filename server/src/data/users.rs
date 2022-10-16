@@ -1,4 +1,4 @@
-use argon2::{Argon2, PasswordHasher};
+use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 pub use diesel::{connection, prelude::*};
 use password_hash::SaltString;
 use rand_core::OsRng;
@@ -44,10 +44,45 @@ impl UnsavedUser {
     }
 }
 impl UnsavedModel<User> for UnsavedUser {
-    fn save(self, connection: &mut PgConnection) -> User {
+    fn save(self, connection: &mut PgConnection) -> QueryResult<User> {
         diesel::insert_into(users::dsl::users)
             .values(self)
             .get_result(connection)
-            .expect("Error saving a new user")
+    }
+}
+
+impl User {
+    /// A function that loads a user from the database and checks the password hash
+    pub fn fetch_check(
+        connection: &mut PgConnection,
+        provided_username: String,
+        provided_password: String,
+    ) -> Option<User> {
+        use crate::schema::users::dsl::*;
+        let user = users
+            .filter(username.eq(provided_username))
+            .load::<User>(connection)
+            .expect("Error loading users")
+            .pop();
+
+        if let Some(user) = user {
+            // Hash the password
+            let password_verifier = Argon2::default();
+            let hash = PasswordHash::new(&user.password_hash).expect("Could not hash the password");
+
+            // Check the password hash
+            let is_password_correct = password_verifier
+                .verify_password(provided_password.as_bytes(), &hash)
+                .is_ok();
+
+            // Only return a user if the password is correct
+            if is_password_correct {
+                Some(user)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
     }
 }

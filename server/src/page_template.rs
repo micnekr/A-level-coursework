@@ -1,4 +1,4 @@
-use std::{fs, path::Path};
+use std::fs;
 
 use actix_web::{web, Resource};
 use askama::Template;
