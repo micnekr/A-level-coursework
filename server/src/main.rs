@@ -5,7 +5,8 @@ use crate::{
     settings::{ALLOWED_ORIGIN, PASSWORD_HASH_LENGTH},
 };
 use actix_cors::Cors;
-use actix_web::{http::header, middleware, App, HttpServer};
+use actix_session::{storage::CookieSessionStore, SessionMiddleware};
+use actix_web::{http::header, middleware, App, HttpServer, Responder};
 use diesel::PgConnection;
 use dotenvy::dotenv;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
@@ -55,6 +56,10 @@ async fn main() -> std::io::Result<()> {
         let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
         let connection = establish_connection(database_url);
 
+        // Set up sessions
+        let session_secret_key = actix_web::cookie::Key::generate();
+
+        // Create server state
         let server_data = actix_web::web::Data::new(ServerState {
             connection: Mutex::new(connection),
         });
@@ -72,10 +77,16 @@ async fn main() -> std::io::Result<()> {
                     .max_age(3600)
                     .supports_credentials(), // Allow the cookie auth.
             )
+            // Set up sessions
+            .wrap(SessionMiddleware::new(
+                CookieSessionStore::default(),
+                session_secret_key.clone(),
+            ))
             // Server state
             .app_data(server_data)
             // endpoints
             .service(endpoints::users::signup)
+            .service(endpoints::users::login)
             // Serving files
             // Serve the static css and js files
             .service(actix_files::Files::new("/css", "public/css").show_files_listing())

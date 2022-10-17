@@ -1,9 +1,10 @@
 use crate::{
-    data::{models::UnsavedModel, users::User},
+    data::{models::UnsavedModel, session::set_session, users::User},
     endpoints::EndpointError,
     ServerState,
 };
-use actix_web::{get, web::Json};
+use actix_session::Session;
+use actix_web::{post, web::Json};
 use diesel::result::Error;
 use serde::Deserialize;
 
@@ -24,9 +25,10 @@ pub struct LoginRequest {
 }
 
 /// An API endpoint used to register a user
-#[get("/api/signup")]
+#[post("/api/signup")]
 pub async fn signup(
     req_body: Json<SignupRequest>,
+    session: Session,
     data: actix_web::web::Data<ServerState>,
 ) -> Result<&'static str, EndpointError> {
     // Create a user with those details
@@ -48,9 +50,9 @@ pub async fn signup(
             if let Error::DatabaseError(diesel::result::DatabaseErrorKind::UniqueViolation, _) = err
             {
                 // Tell the client to use a unique username
-                Result::Err(EndpointError::BadClientData {
-                    explanation: "This username is taken. Try using a different username",
-                })
+                Result::Err(EndpointError::BadClientData(
+                    "This username is taken. Try using a different username",
+                ))
             } else {
                 // Generic error
 
@@ -59,14 +61,18 @@ pub async fn signup(
                 Result::Err(EndpointError::InternalError)
             }
         }
-        Result::Ok(_) => Result::Ok("Success!"),
+        Result::Ok(user) => {
+            set_session(session, &user).expect("Could not serialise user");
+            Result::Ok("Success!")
+        }
     }
 }
 
 /// An API endpoint used to log in a user
-#[get("/api/login")]
+#[post("/api/login")]
 pub async fn login(
     req_body: Json<LoginRequest>,
+    session: Session,
     data: actix_web::web::Data<ServerState>,
 ) -> Result<&'static str, EndpointError> {
     // Get the connection from the mutex
@@ -86,10 +92,13 @@ pub async fn login(
     match user {
         Option::None => {
             // Tell the client that this user does not exist
-            Result::Err(EndpointError::BadClientData {
-                explanation: "This user does not exist. Double-check the username and password.",
-            })
+            Result::Err(EndpointError::BadClientData(
+                "This user does not exist. Double-check the username and password.",
+            ))
         }
-        Option::Some(_) => Result::Ok("Success!"),
+        Option::Some(user) => {
+            set_session(session, &user).expect("Could not serialise user");
+            Result::Ok("Success!")
+        }
     }
 }
