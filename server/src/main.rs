@@ -67,16 +67,6 @@ async fn main() -> std::io::Result<()> {
         App::new()
             // Activate logger middleware
             .wrap(middleware::Logger::default())
-            // Set suitable CORS
-            .wrap(
-                Cors::default()
-                    .allowed_origin(ALLOWED_ORIGIN)
-                    .allowed_methods(vec!["GET", "POST", "DELETE"])
-                    .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
-                    .allowed_header(header::CONTENT_TYPE)
-                    .max_age(3600)
-                    .supports_credentials(), // Allow the cookie auth.
-            )
             // Set up sessions
             .wrap(SessionMiddleware::new(
                 CookieSessionStore::default(),

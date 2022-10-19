@@ -51,7 +51,7 @@ pub async fn signup(
             {
                 // Tell the client to use a unique username
                 Result::Err(EndpointError::BadClientData(
-                    "This username is taken. Try using a different username",
+                    "This username is taken. Try using a different username.",
                 ))
             } else {
                 // Generic error
@@ -93,7 +93,7 @@ pub async fn login(
         Option::None => {
             // Tell the client that this user does not exist
             Result::Err(EndpointError::BadClientData(
-                "This user does not exist. Double-check the username and password.",
+                "Incorrect username or password. Please double-check the username and password.",
             ))
         }
         Option::Some(user) => {
