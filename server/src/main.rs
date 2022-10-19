@@ -6,7 +6,7 @@ use crate::{
 };
 use actix_cors::Cors;
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
-use actix_web::{http::header, middleware, App, HttpServer, Responder};
+use actix_web::{http::header, middleware, App, HttpServer};
 use diesel::PgConnection;
 use dotenvy::dotenv;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
@@ -98,6 +98,7 @@ async fn main() -> std::io::Result<()> {
                 &[
                     ReactElement::PAGE("Login"),
                     ReactElement::COMPONENT("PageContainerBox"),
+                    ReactElement::COMPONENT("ErrorMessage"),
                 ],
             ))
             .service(create_page(
@@ -107,6 +108,7 @@ async fn main() -> std::io::Result<()> {
                     ReactElement::PAGE("Signup"),
                     ReactElement::COMPONENT("PageContainerBox"),
                     ReactElement::COMPONENT("PasswordStrength"),
+                    ReactElement::COMPONENT("ErrorMessage"),
                 ],
             ))
     })
