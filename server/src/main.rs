@@ -1,7 +1,7 @@
 use crate::{
     data::users::UnsavedUser,
     db::establish_connection,
-    page_template::create_page,
+    page_template::{create_page, create_session_protected_page},
     settings::{ALLOWED_ORIGIN, PASSWORD_HASH_LENGTH},
 };
 use actix_cors::Cors;
@@ -29,7 +29,7 @@ pub struct ServerState {
 async fn main() -> std::io::Result<()> {
     // Startup
     // Create a logger
-    env_logger::init_from_env(env_logger::Env::new().default_filter_or("debug"));
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
     // Find out the length of the hash in this representation
     let password_length = UnsavedUser::hash("")
@@ -99,6 +99,17 @@ async fn main() -> std::io::Result<()> {
                     ReactElement::COMPONENT("PageContainerBox"),
                     ReactElement::COMPONENT("PasswordStrength"),
                     ReactElement::COMPONENT("ErrorMessage"),
+                ],
+            ))
+            .service(create_session_protected_page(
+                "Calendar",
+                "/calendar",
+                &[
+                    ReactElement::PAGE("Calendar"),
+                    ReactElement::COMPONENT("Timetable"),
+                    ReactElement::COMPONENT("TimetableEvent"),
+                    ReactElement::COMPONENT("ErrorMessage"),
+                    ReactElement::COMPONENT("PageContainerBoxLarge"),
                 ],
             ))
     })
