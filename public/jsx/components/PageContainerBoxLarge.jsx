@@ -4,8 +4,8 @@ function PageContainerBoxLarge(props) {
   const { children, title } = props;
 
   return <div className="container-fluid vh-100 vw-100">
-    <div className="row justify-content-center mt-4">
-      <div className="col-10 border rounded p-3">
+    <div className="row justify-content-center my-lg-4">
+      <div className="col-lg-10 border rounded p-3">
         {
           title ?
             <h2 className="mx-auto text-center">{title}</h2>

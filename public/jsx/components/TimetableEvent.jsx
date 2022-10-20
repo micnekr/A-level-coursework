@@ -8,12 +8,17 @@ function TimetableEvent(props) {
   const end_of_day = start_time.endOf("day");
   const milliseconds_in_time_period = end_of_day.diff(beginning_of_day);
 
-  // Keep track of the height as it gets updated after the ref gets set
+  // The gap between the event bubble and the containing column, horizontally
+  const horizontal_gap = 4;
+
+  // Keep track of the height and width as it gets updated after the ref gets set
   const [container_height, set_container_height] = useState(0);
+  const [container_width, set_container_width] = useState(0);
 
   // Reset the height on window resize
   useWindowResize(() => {
     set_container_height(container_ref.current.clientHeight);
+    set_container_width(container_ref.current.clientWidth);
   })
 
   /** A function to convert a date object into a time string
@@ -32,10 +37,25 @@ function TimetableEvent(props) {
   return <div style={{
     top: `${interpolate(start_time.valueOf(), beginning_of_day.valueOf(), end_of_day.valueOf(), 0, container_height)}px`,// interpolate between the beginning and end of day
     height: `${interpolate(duration, 0, milliseconds_in_time_period, 0, container_height)}px`,// interpolate between the beginning and end of day
+    width: `${container_width - horizontal_gap}px`, // leave a gap
+    left: `${horizontal_gap / 2}px`, // Center
+
+    // Change the colour back to normal
+    backgroundColor: "white"
   }}
-    className="position-absolute border w-100">
-    <em className="fs-6 text-truncate">{title}</em>
-    <div className="fs-6 text-truncate">{participants}</div>
-    <div className="fs-6 text-truncate">{display_time(start_time)}-{display_time(end_time)}</div>
+    className="position-absolute border rounded"
+  >
+
+
+    <div className="container h-100 gx-0">
+      <div className="row h-100">
+        <div className="col align-self-center">
+          <em className="fs-6 d-block text-truncate text-center">{title}</em>
+          {/* <div className="fs-6 text-truncate text-center">{participants}</div> */}
+          <div className="fs-6 text-center text-muted">{display_time(start_time)}-{display_time(end_time)}</div>
+        </div>
+      </div>
+
+    </div>
   </div>
 }

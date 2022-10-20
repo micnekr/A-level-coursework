@@ -3,10 +3,8 @@ const useRef = React.useRef;
 /** A component that displays a timetable
  */
 function Timetable(props) {
-  const days_of_the_week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const { events: raw_events, date } = props;
-
-  const initial_date = dayjs(date).startOf("week").add(1, "day"); // Their week starts on a Sunday
+  // date is any date in this week
+  const { events: raw_events, start_of_week_date } = props;
 
   // Process the events
   raw_events.forEach(element => {
@@ -40,35 +38,20 @@ function Timetable(props) {
   // References to the 7 columns
   const div_timetable_column_refs = Array(7).fill().map(() => useRef(null));
 
-  /** A function that converts a number to its corresponding ordinal number, e.g. 1 to 1st
-  */
-  function to_ordinal(number) {
-    // Convert to string
-    const str = number + "";
-    // get last digit
-    const last_digit = str[str.length - 1];
-    const suffix =
-      last_digit === "1" ? "st"
-        : last_digit === "2" ? "nd"
-          : last_digit === "3" ? "rd" : "th";
-    return str + suffix;
-  }
-
-  return <div className="container border p-1">
+  return <div className="container-lg border p-1">
     <div className="row gx-0">
       {/* Add 7 columns for each day of the week*/}
       {
         Array(7).fill().map((_, i) => {
-          const day = initial_date.add(i, "day");
-          return <div className="col" key={i}>
-            <h4 className="text-center">
-              {days_of_the_week[i]}
-              {" "}
-              {to_ordinal(day.date())}
-            </h4>
+          const day = start_of_week_date.add(i, "day");
+          return <div className="col-md" key={i} >
+            <h5 className="text-center">
+              {display_day_and_date(day)}
+            </h5>
             {/* A column corresponding to events on one day*/}
-            <div className="border position-relative" style={{
-              height: "800px"
+            <div className="border border-light position-relative" style={{
+              height: "1400px",
+              backgroundColor: "#f5f5f5"
             }} ref={div_timetable_column_refs[i]}>
 
               {
@@ -83,5 +66,5 @@ function Timetable(props) {
         )
       }
     </div>
-  </div>
+  </div >
 }
