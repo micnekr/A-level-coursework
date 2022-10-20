@@ -77,6 +77,7 @@ async fn main() -> std::io::Result<()> {
             // endpoints
             .service(endpoints::users::signup)
             .service(endpoints::users::login)
+            .service(endpoints::events::get_events)
             // Serving files
             // Serve the static css and js files
             .service(actix_files::Files::new("/css", "public/css").show_files_listing())

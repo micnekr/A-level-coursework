@@ -17,7 +17,7 @@ pub struct UnsavedUser {
     pub password_hash: String,
 }
 
-#[derive(Queryable, Debug, Serialize)]
+#[derive(Identifiable, Queryable, Debug, Serialize)]
 /// A user struct that represents a user record in a database
 pub struct User {
     pub id: i32,

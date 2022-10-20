@@ -9,8 +9,8 @@ function Calendar() {
     dayjs(new Date()).startOf("week").add(1, "day")
   ); // Their week starts on a Sunday, so we add 1 to make it a Monday
   const test_events = [{
-    start_time: new Date(1666217225862), // a date that spans two days, for testing
-    duration: 2 * 60 * 60 * 1000,
+    start_time: 1666217225, // a date that spans two days, for testing
+    duration: 2 * 60 * 60,
     title: "Title",
     participants: "Participants"
   }];

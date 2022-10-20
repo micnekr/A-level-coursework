@@ -9,9 +9,9 @@ function Timetable(props) {
   // Process the events
   raw_events.forEach(element => {
     // Convert so that it can be used with the library
-    element.start_time = dayjs(element.start_time);
+    element.start_time = dayjs.unix(element.start_time);
     // Calculate the time the event ends at
-    element.end_time = element.start_time.add(element.duration, "milliseconds");
+    element.end_time = element.start_time.add(element.duration, "seconds");
   });
 
   // If an event runs over to the next day, split it into two.

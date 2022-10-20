@@ -1,3 +1,4 @@
+pub mod events;
 pub mod users;
 use actix_web::{error, http::StatusCode, HttpResponse};
 use derive_more::{Display, Error};
