@@ -51,7 +51,6 @@ function TimetableEvent(props) {
       <div className="row h-100">
         <div className="col align-self-center">
           <em className="fs-6 d-block text-truncate text-center">{title}</em>
-          {/* <div className="fs-6 text-truncate text-center">{participants}</div> */}
           <div className="fs-6 text-center text-muted">{display_time(start_time)}-{display_time(end_time)}</div>
         </div>
       </div>

@@ -8,15 +8,28 @@ function Calendar() {
   const [start_of_week_date, set_start_of_week_date] = useState(
     dayjs(new Date()).startOf("week").add(1, "day")
   ); // Their week starts on a Sunday, so we add 1 to make it a Monday
-  const test_events = [{
-    start_time: 1666217225, // a date that spans two days, for testing
-    duration: 2 * 60 * 60,
-    title: "Title",
-    participants: "Participants"
-  }];
+  const [events, set_events] = useState([]);
+  // em is short for "error message"
+  const [overall_em, set_overall_em] = useState("");
 
+  // Load the events when the page is loaded, once
+  useEffect(() => {
+    async function get_data() {
+      const res = await f("/api/get_events", "GET");
+      // If there was an error, display it
+      if (res.status >= 400) {
+        // Read the error message
+        const error = await res.text();
+        return set_overall_em(error);
+      }
+      // Parse the response
+      const events = await res.json();
+    }
+    get_data();
+  }, [])
 
   return <PageContainerBoxLarge title="Your Calendar">
+    <ErrorMessage em={overall_em} />
     <Pagination className="container">
       <div className="row justify-content-center w-100 gx-0">
         <Pagination.Prev className="col-auto" onClick={() => {
@@ -32,6 +45,6 @@ function Calendar() {
         }} />
       </div>
     </Pagination>
-    <Timetable events={test_events} start_of_week_date={start_of_week_date} />
+    <Timetable events={events} start_of_week_date={start_of_week_date} />
   </PageContainerBoxLarge>;
 }
