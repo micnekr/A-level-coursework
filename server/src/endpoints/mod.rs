@@ -1,7 +1,7 @@
 pub mod events;
 pub mod users;
 use actix_web::{error, http::StatusCode, HttpResponse};
-use derive_more::{Display, Error};
+use derive_more::Display;
 
 /// An enum that represents an error in the endpoint
 #[derive(Debug, Display)]

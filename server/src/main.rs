@@ -5,7 +5,7 @@ use crate::{
     settings::{ALLOWED_ORIGIN, PASSWORD_HASH_LENGTH},
 };
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
-use actix_web::{cookie::Key, http::header, middleware, App, HttpServer};
+use actix_web::{cookie::Key, middleware, App, HttpServer};
 use diesel::PgConnection;
 use dotenvy::dotenv;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
@@ -84,6 +84,7 @@ async fn main() -> std::io::Result<()> {
             .service(endpoints::users::signup)
             .service(endpoints::users::login)
             .service(endpoints::events::get_events)
+            .service(endpoints::events::create_event)
             // Serving files
             // Serve the static css and js files
             .service(actix_files::Files::new("/css", "public/css").show_files_listing())

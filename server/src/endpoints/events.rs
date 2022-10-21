@@ -1,17 +1,19 @@
-use std::borrow::BorrowMut;
-
 use actix_session::Session;
-use actix_web::{get, web, Responder};
-use serde::Serialize;
+use actix_web::{
+    get, post,
+    web::{self, Json},
+    Responder,
+};
+use serde::{Deserialize, Serialize};
 
 use crate::{
-    data::{events::Event, session::use_session},
+    data::{
+        events::{Event, RecurrenceType, UnsavedEvent, VisibilityType},
+        models::UnsavedModel,
+        session::use_session,
+    },
     ServerState,
 };
-
-use diesel::BelongingToDsl;
-use diesel::QueryDsl;
-use diesel::RunQueryDsl;
 
 use super::EndpointError;
 
@@ -20,16 +22,16 @@ use super::EndpointError;
 struct GetEventsResponse {
     events: Vec<Event>,
 }
-/// An API endpoint used to register a user
+/// An API endpoint used to get events a user needs to attend
 #[get("/api/get_events")]
 pub async fn get_events(
     session: Session,
-    data: actix_web::web::Data<ServerState>,
+    server_state: actix_web::web::Data<ServerState>,
 ) -> Result<impl Responder, EndpointError> {
     use_session!(session, user);
 
     // Get the connection from the mutex
-    let mut connection = data
+    let mut connection = server_state
         .connection
         .lock()
         .expect("Could not get the connection from ServerState");
@@ -37,10 +39,64 @@ pub async fn get_events(
     let events = Event::get_events_with_user(&mut connection, &user);
 
     match events {
-        Ok(events) => Ok(web::Json(GetEventsResponse { events })),
+        Ok(events) => Ok(Json(GetEventsResponse { events })),
         Err(err) => {
             // Log the error
             log::error!("events.get_events.database: {}", err);
+            Result::Err(EndpointError::InternalError)
+        }
+    }
+}
+
+/// A struct for create_event requests
+#[derive(Deserialize)]
+pub struct CreateEventRequest {
+    pub title: String,
+    pub visibility: VisibilityType,
+    pub start_time: i32,
+    pub duration: i32,
+    pub recurrence_type: RecurrenceType,
+}
+
+/// An API endpoint used to create an event
+#[post("/api/create_event")]
+pub async fn create_event(
+    session: Session,
+    req_body: Json<CreateEventRequest>,
+    server_state: actix_web::web::Data<ServerState>,
+) -> Result<&'static str, EndpointError> {
+    use_session!(session, user);
+
+    let CreateEventRequest {
+        title,
+        visibility,
+        recurrence_type,
+        start_time,
+        duration,
+    } = req_body.0;
+
+    let event = UnsavedEvent {
+        owner_id: user.id,
+        title,
+        visibility,
+        recurrence_type,
+        start_time,
+        duration,
+    };
+
+    // Get the connection from the mutex
+    let mut connection = server_state
+        .connection
+        .lock()
+        .expect("Could not get the connection from ServerState");
+
+    match event.save(&mut connection) {
+        Ok(_) => Ok("Success!"),
+        Err(err) => {
+            // Generic error
+
+            // Log the error
+            log::error!("events.create_event.save: {}", err);
             Result::Err(EndpointError::InternalError)
         }
     }

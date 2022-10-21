@@ -71,7 +71,6 @@ function Signup() {
       return set_overall_em(error);
     }
 
-
     // Otherwise, refirect to the calendar page
     window.location.href = "/";
   }

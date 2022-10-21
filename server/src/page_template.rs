@@ -4,7 +4,7 @@ use actix_session::Session;
 use actix_web::{http::header::LOCATION, web, HttpResponse, Resource};
 use askama::Template;
 
-use crate::data::session::{get_session, use_session};
+use crate::data::session::get_session;
 
 /// A struct used to compile a page
 #[derive(Template)]
