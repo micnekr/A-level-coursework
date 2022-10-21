@@ -60,6 +60,6 @@ function Login() {
 
 
     // Otherwise, refirect to the calendar page
-    window.location.href = "/calendar";
+    window.location.href = "/";
   }
 }

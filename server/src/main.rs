@@ -110,13 +110,22 @@ async fn main() -> std::io::Result<()> {
             ))
             .service(create_session_protected_page(
                 "Calendar",
-                "/calendar",
+                "/",
                 &[
                     ReactElement::PAGE("Calendar"),
                     ReactElement::COMPONENT("Timetable"),
                     ReactElement::COMPONENT("TimetableEvent"),
                     ReactElement::COMPONENT("ErrorMessage"),
                     ReactElement::COMPONENT("PageContainerBoxLarge"),
+                ],
+            ))
+            .service(create_session_protected_page(
+                "Create an Event",
+                "/create_event",
+                &[
+                    ReactElement::PAGE("CreateEvent"),
+                    ReactElement::COMPONENT("ErrorMessage"),
+                    ReactElement::COMPONENT("PageContainerBox"),
                 ],
             ))
     })
