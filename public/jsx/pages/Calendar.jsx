@@ -46,5 +46,13 @@ function Calendar() {
       </div>
     </Pagination>
     <Timetable events={events} start_of_week_date={start_of_week_date} />
+    <Button variant="primary" onClick={() => {
+      // Redirect to the event creation page
+      window.location.href = "/create_event";
+    }}
+      className="mt-3 mx-auto d-block w-60"
+    >
+      New event
+    </Button>
   </PageContainerBoxLarge>;
 }

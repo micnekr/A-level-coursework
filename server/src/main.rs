@@ -4,15 +4,14 @@ use crate::{
     page_template::{create_page, create_session_protected_page},
     settings::{ALLOWED_ORIGIN, PASSWORD_HASH_LENGTH},
 };
-use actix_cors::Cors;
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
-use actix_web::{http::header, middleware, App, HttpServer};
+use actix_web::{cookie::Key, http::header, middleware, App, HttpServer};
 use diesel::PgConnection;
 use dotenvy::dotenv;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use page_template::ReactElement;
-use std::env;
-use std::sync::Mutex;
+use std::{env, fs::File};
+use std::{io::Read, sync::Mutex};
 
 pub mod data;
 pub mod db;
@@ -57,7 +56,14 @@ async fn main() -> std::io::Result<()> {
         let connection = establish_connection(database_url);
 
         // Set up sessions
-        let session_secret_key = actix_web::cookie::Key::generate();
+
+        // Read the key file
+        let mut f = File::open("session_key.txt").expect("Could not open the session key file");
+        let mut raw_key = vec![];
+        f.read_to_end(&mut raw_key)
+            .expect("Could not read the session key");
+
+        let session_secret_key = Key::from(raw_key.as_slice());
 
         // Create server state
         let server_data = actix_web::web::Data::new(ServerState {

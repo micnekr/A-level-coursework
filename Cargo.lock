@@ -784,6 +784,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "generate_session_key"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+]
+
+[[package]]
 name = "generic-array"
 version = "0.14.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
