@@ -33,7 +33,6 @@ function TimetableEvent(props) {
     return min_out + (n - min_n) / (max_n - min_n) * max_out;
   }
 
-
   return <div style={{
     top: `${interpolate(start_time.unix(), beginning_of_day.unix(), end_of_day.unix(), 0, container_height)}px`,// interpolate between the beginning and end of day
     height: `${interpolate(duration, 0, seconds_in_time_period, 0, container_height)}px`,// interpolate between the beginning and end of day
