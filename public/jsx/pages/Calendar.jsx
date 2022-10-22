@@ -8,6 +8,8 @@ function Calendar() {
   const [start_of_week_date, set_start_of_week_date] = useState(
     dayjs(new Date()).startOf("week").add(1, "day")
   ); // Their week starts on a Sunday, so we add 1 to make it a Monday
+  const start_of_next_week_date = start_of_week_date.add(1, "w");
+
   const [events, set_events] = useState([]);
   // em is short for "error message"
   const [overall_em, set_overall_em] = useState("");
@@ -38,7 +40,7 @@ function Calendar() {
           set_start_of_week_date(start_of_week_date.subtract(1, "w"));
         }} />
 
-        <Pagination.Item className="col-auto">{display_day_and_date(start_of_week_date)}-{display_day_and_date(start_of_week_date.add(6, "d"))}</Pagination.Item>
+        <Pagination.Item className="col-auto">{start_of_week_date.format("DD/MM/YYYY")} - {start_of_week_date.add(6, "d").format("DD/MM/YYYY")}</Pagination.Item>
 
         <Pagination.Next className="col-auto" onClick={() => {
           // Go to the next week
@@ -46,7 +48,7 @@ function Calendar() {
         }} />
       </div>
     </Pagination>
-    <Timetable events={events} start_of_week_date={start_of_week_date} />
+    <Timetable events={events} start_of_week_date={start_of_week_date} start_of_next_week_date={start_of_next_week_date} />
     <Button variant="primary" onClick={() => {
       // Redirect to the event creation page
       window.location.href = "/create_event";

@@ -4,8 +4,7 @@ const useRef = React.useRef;
  */
 function Timetable(props) {
   // date is any date in this week
-  const { events: raw_events, start_of_week_date } = props;
-  const end_of_week_date = start_of_week_date.endOf("week");
+  const { events: raw_events, start_of_week_date, start_of_next_week_date } = props;
 
   // If an event runs over to the next day, split it into two.
   let events = [];
@@ -73,7 +72,7 @@ function Timetable(props) {
                     const is_same_day_of_the_week = el.start_time.day() === day_in_this_column.day()
 
                     // Check if it is not before the first time the event has occured
-                    const is_at_least_first_time = el.start_time.unix() <= end_of_week_date.unix();
+                    const is_at_least_first_time = el.start_time.unix() < start_of_next_week_date.unix();
 
                     return is_same_day_of_the_week && is_at_least_first_time;
                   } else {

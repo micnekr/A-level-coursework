@@ -44,11 +44,3 @@ function to_ordinal(number) {
         : last_digit === "3" ? "rd" : "th";
   return str + suffix;
 }
-
-// Displays a date in the format like "Mon 13th"
-function display_day_and_date(date) {
-  // Note that this library takes Sunday as the 0th day of the week
-  const days_of_the_week = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const day_of_the_week = days_of_the_week[date.day()];
-  return `${day_of_the_week} ${to_ordinal(date.date())}`;
-}

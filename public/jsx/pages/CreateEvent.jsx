@@ -122,6 +122,8 @@ function CreateEvent() {
 
     // Check that the title is not empty
     if (title === "") return set_title_em("The title can not be empty");
+    // Check that the times are not empty, either
+    if (isNaN(start_time.unix()) || isNaN(end_time.unix())) return set_time_em("Please enter valid times");
 
     // Make the actual request
     const res = await f("/api/create_event", "POST", {
