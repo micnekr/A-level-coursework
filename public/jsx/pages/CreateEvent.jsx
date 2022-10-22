@@ -20,8 +20,8 @@ function CreateEvent() {
 
   // Have variables to keep track of the state
   const [title, set_title] = useState("");
-  const [recurrence, set_recurrence] = useState("weekly");
-  const [visibility, set_visibility] = useState("private");
+  const [recurrence, set_recurrence] = useState("Weekly");
+  const [visibility, set_visibility] = useState("Private");
   const [start_time, set_start_time] = useState(time_now);
   const [end_time, set_end_time] = useState(time_now);
 
@@ -58,8 +58,8 @@ function CreateEvent() {
           const new_recurrence = e.target.value;
           set_recurrence(new_recurrence);
         }}>
-          <option value="weekly">Weekly</option>
-          <option value="once">Once</option>
+          <option value="Weekly">Weekly</option>
+          <option value="Once">Once</option>
         </Form.Select>
       </Form.Group>
 
@@ -104,8 +104,8 @@ function CreateEvent() {
           const new_visibility = e.target.value;
           set_visibility(new_visibility);
         }}>
-          <option value="private">Participants</option>
-          <option value="public">Everyone</option>
+          <option value="Private">Participants</option>
+          <option value="Public">Everyone</option>
         </Form.Select>
       </Form.Group>
 
@@ -122,5 +122,24 @@ function CreateEvent() {
 
     // Check that the title is not empty
     if (title === "") return set_title_em("The title can not be empty");
+
+    // Make the actual request
+    const res = await f("/api/create_event", "POST", {
+      title,
+      visibility,
+      recurrence,
+      start_time: start_time.unix(),
+      duration: end_time.unix() - start_time.unix(),
+    });
+
+    // if it was not successful, show the error message
+    if (res.status >= 400) {
+      // Read the error message
+      const error = await res.text();
+      return set_overall_em(error);
+    }
+
+    // Otherwise, refirect to the calendar page
+    window.location.href = "/";
   }
 }

@@ -1,7 +1,7 @@
 pub use diesel::{connection, prelude::*};
 use serde::{Deserialize, Serialize};
 
-use crate::schema::{events, events_participants};
+use crate::schema::{events, events_participants, users};
 
 use super::{models::UnsavedModel, users::User};
 
@@ -28,7 +28,7 @@ pub struct UnsavedEvent {
     pub visibility: VisibilityType,
     pub start_time: i32,
     pub duration: i32,
-    pub recurrence_type: RecurrenceType,
+    pub recurrence: RecurrenceType,
 }
 
 #[derive(Identifiable, Queryable, Associations, PartialEq, Debug, Serialize, Deserialize)]
@@ -62,16 +62,22 @@ impl Event {
         connection: &mut PgConnection,
         user: &User,
     ) -> Result<Vec<Event>, diesel::result::Error> {
-        // Query the events where the user is a participant or owner
-        let events = events::table
-            .inner_join(events_participants::table)
-            .filter(
-                events_participants::participant_id
-                    .eq(user.id)
-                    .or(events::owner_id.eq(user.id)),
-            )
+        // Query the events where the user is an owner
+        let events_as_owner = events::table
+            .filter(events::owner_id.eq(user.id))
             .select(events::all_columns)
             .load::<Event>(connection)?;
+
+        // Query all the events where the user is a participant
+        let mut events_as_participant = events::table
+            .inner_join(events_participants::table)
+            .filter(events_participants::participant_id.eq(user.id))
+            .select(events::all_columns)
+            .load::<Event>(connection)?;
+
+        // Merge the two vectors
+        events_as_participant.extend(events_as_owner);
+        let events = events_as_participant;
 
         Ok(events)
     }

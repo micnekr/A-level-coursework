@@ -23,7 +23,8 @@ function Calendar() {
         return set_overall_em(error);
       }
       // Parse the response
-      const events = await res.json();
+      const events = (await res.json()).events;
+      set_events(events);
     }
     get_data();
   }, [])

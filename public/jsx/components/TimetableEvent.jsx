@@ -6,7 +6,7 @@ function TimetableEvent(props) {
 
   const beginning_of_day = start_time.startOf("day");
   const end_of_day = start_time.endOf("day");
-  const milliseconds_in_time_period = end_of_day.diff(beginning_of_day);
+  const seconds_in_time_period = end_of_day.unix() - beginning_of_day.unix();
 
   // The gap between the event bubble and the containing column, horizontally
   const horizontal_gap = 4;
@@ -35,8 +35,8 @@ function TimetableEvent(props) {
 
 
   return <div style={{
-    top: `${interpolate(start_time.valueOf(), beginning_of_day.valueOf(), end_of_day.valueOf(), 0, container_height)}px`,// interpolate between the beginning and end of day
-    height: `${interpolate(duration, 0, milliseconds_in_time_period, 0, container_height)}px`,// interpolate between the beginning and end of day
+    top: `${interpolate(start_time.unix(), beginning_of_day.unix(), end_of_day.unix(), 0, container_height)}px`,// interpolate between the beginning and end of day
+    height: `${interpolate(duration, 0, seconds_in_time_period, 0, container_height)}px`,// interpolate between the beginning and end of day
     width: `${container_width - horizontal_gap}px`, // leave a gap
     left: `${horizontal_gap / 2}px`, // Center
 

@@ -9,6 +9,6 @@ CREATE TABLE events (
   visibility visibility_type NOT NULL,
   start_time INT NOT NULL, -- a UNIX timestamp, in seconds
   duration INT NOT NULL, -- in seconds
-  recurrence_type recurrence_type NOT NULL,
+  recurrence recurrence_type NOT NULL,
   FOREIGN KEY(owner_id) REFERENCES users(id)
 )

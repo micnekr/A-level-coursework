@@ -22,7 +22,7 @@ diesel::table! {
         visibility -> VisibilityType,
         start_time -> Int4,
         duration -> Int4,
-        recurrence_type -> RecurrenceType,
+        recurrence -> RecurrenceType,
     }
 }
 

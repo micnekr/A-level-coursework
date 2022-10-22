@@ -1,9 +1,5 @@
 use actix_session::Session;
-use actix_web::{
-    get, post,
-    web::{self, Json},
-    Responder,
-};
+use actix_web::{get, post, web::Json, Responder};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -55,7 +51,7 @@ pub struct CreateEventRequest {
     pub visibility: VisibilityType,
     pub start_time: i32,
     pub duration: i32,
-    pub recurrence_type: RecurrenceType,
+    pub recurrence: RecurrenceType,
 }
 
 /// An API endpoint used to create an event
@@ -70,7 +66,7 @@ pub async fn create_event(
     let CreateEventRequest {
         title,
         visibility,
-        recurrence_type,
+        recurrence,
         start_time,
         duration,
     } = req_body.0;
@@ -79,7 +75,7 @@ pub async fn create_event(
         owner_id: user.id,
         title,
         visibility,
-        recurrence_type,
+        recurrence,
         start_time,
         duration,
     };
