@@ -2,7 +2,7 @@ use crate::{
     data::users::UnsavedUser,
     db::establish_connection,
     page_template::{create_page, create_session_protected_page},
-    settings::{ALLOWED_ORIGIN, PASSWORD_HASH_LENGTH},
+    settings::{DOMAIN, PASSWORD_HASH_LENGTH, PORT},
 };
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
 use actix_web::{cookie::Key, middleware, App, HttpServer};
@@ -50,6 +50,7 @@ async fn main() -> std::io::Result<()> {
         .expect("Could not locate the cert.pem file");
 
     // create the server
+    let allowed_origin = format!("{DOMAIN}:{PORT}");
     let server = HttpServer::new(|| {
         // Connect to the database using the URL in the .env file
         let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -131,7 +132,8 @@ async fn main() -> std::io::Result<()> {
             ))
     })
     // set up openssl for use
-    .bind_openssl(ALLOWED_ORIGIN, ssl_builder)?;
+    .bind_openssl(allowed_origin.clone(), ssl_builder)?;
+    println!("Listening on {allowed_origin}");
 
     server.run().await
 }

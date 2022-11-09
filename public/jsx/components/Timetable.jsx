@@ -47,6 +47,17 @@ function Timetable(props) {
   // References to the 7 columns
   const div_timetable_column_refs = Array(7).fill().map(() => useRef(null));
 
+  function display_day_and_date(date) {
+    // Note that this library takes Sunday as the 0th day of the week
+    const days_of_the_week = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    // Get the name for the current day of the week
+    const day_of_the_week = days_of_the_week[date.day()];
+
+    // Print name of the day and its number
+    return `${day_of_the_week} ${to_ordinal(date.date())}`;
+  }
+
   return <div className="container-lg border p-1">
     <div className="row gx-0">
       {/* Add 7 columns for each day of the week*/}

@@ -7,6 +7,6 @@ fn main() {
     let key = key.master();
 
     // Write it to the file
-    let mut f = File::create("session_key.txt").expect();
-    f.write_all(key);
+    let mut f = File::create("session_key.txt").unwrap();
+    f.write_all(key).unwrap();
 }

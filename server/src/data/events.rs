@@ -1,7 +1,7 @@
 pub use diesel::{connection, prelude::*};
 use serde::{Deserialize, Serialize};
 
-use crate::schema::{events, events_participants, users};
+use crate::schema::{events, events_participants};
 
 use super::{models::UnsavedModel, users::User};
 
