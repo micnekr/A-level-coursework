@@ -84,12 +84,15 @@ async fn main() -> std::io::Result<()> {
             // endpoints
             .service(endpoints::users::signup)
             .service(endpoints::users::login)
+            .service(endpoints::users::is_logged_in)
+            .service(endpoints::notifications::get_notifications)
             .service(endpoints::events::get_events)
             .service(endpoints::events::create_event)
             // Serving files
             // Serve the static css and js files
             .service(actix_files::Files::new("/css", "public/css").show_files_listing())
             .service(actix_files::Files::new("/js", "public/js").show_files_listing())
+            .service(actix_files::Files::new("/img", "public/img").show_files_listing())
             // Serve pages by constructing them out of their components
             .service(create_page(
                 "Log in",

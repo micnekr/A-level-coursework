@@ -1,8 +1,4 @@
-const Button = ReactBootstrap.Button;
 const Pagination = ReactBootstrap.Pagination;
-
-const useState = React.useState;
-const useEffect = React.useEffect;
 
 function Calendar() {
   const [start_of_week_date, set_start_of_week_date] = useState(

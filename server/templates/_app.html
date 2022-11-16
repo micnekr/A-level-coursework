@@ -46,7 +46,7 @@
     // Load DOM
     const domContainer = document.querySelector('#_app');
     const root = ReactDOM.createRoot(domContainer);
-    root.render(React.createElement({{page_component_name}}));
+    root.render(React.createElement(App, {}, React.createElement({{page_component_name}})));
   </script>
 </body>
 

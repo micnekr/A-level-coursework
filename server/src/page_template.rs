@@ -4,14 +4,14 @@ use actix_session::Session;
 use actix_web::{http::header::LOCATION, web, HttpResponse, Resource};
 use askama::Template;
 
-use crate::data::session::get_session;
+use crate::{data::session::get_session, settings::COMPONENTS_ALWAYS_INCLUDED};
 
 /// A struct used to compile a page
 #[derive(Template)]
 #[template(path = "_app.html", escape = "none")]
 #[derive(Clone)]
 pub struct PageTemplate<'a> {
-    /// What to display in the <title> tag
+    /// What to display in the `title` tag
     title: &'a str,
     /// The name of the component that is used as an entry point
     page_component_name: &'a str,
@@ -20,7 +20,7 @@ pub struct PageTemplate<'a> {
 }
 
 /// Generate the text to be sent as a response to a page request
-/// `title` is the name of the page to be displayed using the <title> tag
+/// `title` is the name of the page to be displayed using the `title` tag
 /// `path` is the URL path under which this resource would be located
 /// `elements` are the react elements to be included in the page
 /// # Panics
@@ -33,11 +33,16 @@ fn create_template(title: &'static str, elements: &'static [ReactElement]) -> &'
     // Only use the first one
     let page_component_name = page_elements.get(0).unwrap().name();
 
+    // Add the components that are included on all pages
+    let common_components = COMPONENTS_ALWAYS_INCLUDED.iter();
+    let components = elements.into_iter().chain(common_components);
+    // Read all the code for the elements
+    let components = components.map(|e| e.read_code()).collect();
+
     let template = PageTemplate {
         title,
         page_component_name,
-        // Read all the code for the elements
-        components: elements.into_iter().map(|e| e.read_code()).collect(),
+        components,
     };
     let template = template.render().expect("Could not render a template");
 
@@ -48,7 +53,7 @@ fn create_template(title: &'static str, elements: &'static [ReactElement]) -> &'
 
 /// Create the code for a page based on the components that need to be included
 /// The page will only be accessible to users who are logged in
-/// `title` is the name of the page to be displayed using the <title> tag
+/// `title` is the name of the page to be displayed using the `title` tag
 /// `path` is the URL path under which this resource would be located
 /// `elements` are the react elements to be included in the page
 /// # Panics
@@ -78,7 +83,7 @@ pub fn create_session_protected_page(
 }
 
 /// Create the code for a page based on the components that need to be included
-/// `title` is the name of the page to be displayed using the <title> tag
+/// `title` is the name of the page to be displayed using the `title` tag
 /// `path` is the URL path under which this resource would be located
 /// `elements` are the react elements to be included in the page
 /// # Panics

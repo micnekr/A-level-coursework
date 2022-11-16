@@ -1,10 +1,14 @@
 use crate::{
-    data::{models::UnsavedModel, session::set_session, users::User},
+    data::{
+        models::UnsavedModel,
+        session::{get_session, set_session},
+        users::User,
+    },
     endpoints::EndpointError,
     ServerState,
 };
 use actix_session::Session;
-use actix_web::{post, web::Json};
+use actix_web::{get, post, web::Json, Responder};
 use diesel::result::Error;
 use serde::Deserialize;
 
@@ -101,4 +105,11 @@ pub async fn login(
             Result::Ok("Success!")
         }
     }
+}
+
+/// An API endpoint used to check if the user is logged in
+#[get("/api/is_logged_in")]
+pub async fn is_logged_in(session: Session) -> impl Responder {
+    let user = get_session(session);
+    Json(user.is_some())
 }

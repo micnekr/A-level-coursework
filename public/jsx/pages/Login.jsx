@@ -1,8 +1,4 @@
-const Button = ReactBootstrap.Button;
 const Form = ReactBootstrap.Form;
-
-const useState = React.useState;
-const useEffect = React.useEffect;
 
 function Login() {
   // Have variables to keep track of the state

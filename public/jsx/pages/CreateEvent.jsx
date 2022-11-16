@@ -1,8 +1,4 @@
-const Button = ReactBootstrap.Button;
 const Form = ReactBootstrap.Form;
-
-const useState = React.useState;
-const useEffect = React.useEffect;
 
 function CreateEvent() {
   // Remove the seconds and milliseconds, as we are only concerned about dates and hh:mm
