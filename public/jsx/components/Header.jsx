@@ -36,38 +36,31 @@ function Header() {
     <HeaderButton content="Signup" link="/signup" key={1} />
   ];
 
-  return <div className="container-fluid" style={{
+  return <div className="container-fluid gx-0" style={{
     backgroundColor: "#FAFAFA"
   }}>
-    <div className="row container-md mx-auto p-2 align-items-center justify-content-md-start">
-      <div className="row">
-        {/* Logo image */}
-        <div className="col-3 col-sm-2">
-          <Image src="/img/logo.png" height={38} style={{ cursor: "pointer" }} onClick={() => { window.location.href = "/" }
-          } />
-        </div>
-        {/* Links and buttons */}
-        <div className="col container">
-          <div className="row justify-content-md-evenly">
-            {/* Only display these buttons if logged in */}
-            {is_logged_in ? buttons_shown_when_logged_in : buttons_shown_when_logged_out}
-          </div>
-        </div>
-
-        {/* If logged in, show the notifications */}
-        {
-          is_logged_in ?
-            < div className="col-3 col-sm-2 position-relative">
-              <Image src="/img/notification.png" height={38} style={{ cursor: "pointer" }} onClick={() => { }
-              } />
-              {/* If there are notifications, show their number */}
-              {notifications.length !== 0 ?
-                <NotificationCircle notification_number={notifications.length} />
-                : null}
-            </div>
-            : null
-        }
+    <div className="row container-md mx-auto p-2 align-items-center justify-content-md-start gx-0">
+      {/* Logo image */}
+      <div className="col-2">
+        <Image src="/img/logo.png" height={38} style={{ cursor: "pointer" }} onClick={() => { window.location.href = "/" }
+        } />
       </div>
+      {/* Links and buttons */}
+      <div className="col container">
+        <div className="row justify-content-md-evenly">
+          {/* Only display these buttons if logged in */}
+          {is_logged_in ? buttons_shown_when_logged_in : buttons_shown_when_logged_out}
+        </div>
+      </div>
+
+      {/* If logged in, show the notifications */}
+      {
+        is_logged_in ?
+          <div className="col-2">
+            <NotificationIcon notifications={notifications} />
+          </div>
+          : null
+      }
     </div>
   </div >;
 }
@@ -87,6 +80,8 @@ function HeaderButton(props) {
   </div>
 }
 
+/** A react component to display a circle with the number of notifications
+*/
 function NotificationCircle(props) {
   let { notification_number } = props;
 
@@ -96,8 +91,8 @@ function NotificationCircle(props) {
   if (notification_number.length > 2) notification_number = "99";
 
 
-  return <div className="position-relative rounded-circle" style={{
-    top: "-10px",
+  return <div className="position-absolute rounded-circle" style={{
+    top: "25px",
     left: "25px",
     height: "24px",
     width: "24px",
@@ -105,4 +100,53 @@ function NotificationCircle(props) {
     backgroundColor: "red",
     color: "white"
   }}>{notification_number}</div>;
+}
+
+/** A react component to display the bell icon with a notification number
+*/
+function NotificationIcon(props) {
+  const { notifications } = props;
+  const notification_number = notifications.length;
+
+  // Should we show the notifications?
+  const [show_notifications, set_show_notifications] = useState(true);
+
+  function toggle_show_notification() {
+    set_show_notifications(!show_notifications);
+  }
+
+  // Center it
+  return <div className="text-center">
+    <div className="position-relative d-inline-block">
+      <div style={{ cursor: "pointer" }} onClick={toggle_show_notification}>
+        <Image src="/img/notification.png" height={38} />
+        {/* If there are notifications, show their number */}
+        {
+          notification_number !== 0 ?
+            <NotificationCircle notification_number={notification_number} />
+            : null
+        }
+      </div>
+      {
+        show_notifications ?
+          <NotificationList notifications={notifications} />
+          : null
+      }
+    </div>
+  </div >
+}
+
+function NotificationList(props) {
+  const { notifications } = props;
+  return <div className="position-absolute border rounded p-3 bg-white" style={{
+    top: "50px",
+    right: "-20px",
+    textAlign: "center",
+  }}>
+    {
+      notifications.map(notification =>
+        <div>test</div>
+      )
+    }
+  </div>;
 }
