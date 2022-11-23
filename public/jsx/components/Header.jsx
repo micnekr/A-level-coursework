@@ -5,7 +5,12 @@ const Image = ReactBootstrap.Image;
  */
 function Header() {
   const [is_logged_in, set_is_logged_in] = useState(false);
-  const [notifications, set_notifications] = useState([]);
+  const [notifications, set_notifications] = useState([
+    { event: { start_time: 1669220852401, duration: 3600, title: "Some event", participants: [] } },
+    {
+      event: { start_time: 1669220952401, duration: 3600, title: "Some other event", participants: [] },
+    }
+  ]);
 
   /// Request an endpoint and call the setter with the data returned
   async function request(endpoint, setter) {
@@ -22,7 +27,7 @@ function Header() {
   // Check if logged in when the page is loaded and load notification count
   useEffect(() => {
     request("/api/is_logged_in", set_is_logged_in);
-    request("/api/get_notifications", set_notifications);
+    // request("/api/get_notifications", set_notifications);
   }, []);
 
   // A list of buttons to show only when the user is logged in
@@ -109,7 +114,7 @@ function NotificationIcon(props) {
   const notification_number = notifications.length;
 
   // Should we show the notifications?
-  const [show_notifications, set_show_notifications] = useState(true);
+  const [show_notifications, set_show_notifications] = useState(false);
 
   function toggle_show_notification() {
     set_show_notifications(!show_notifications);
@@ -136,16 +141,48 @@ function NotificationIcon(props) {
   </div >
 }
 
+/** A react component to display the list of events
+*/
 function NotificationList(props) {
   const { notifications } = props;
+  const number_of_items = notifications.length;
   return <div className="position-absolute border rounded p-3 bg-white" style={{
     top: "50px",
     right: "-20px",
     textAlign: "center",
+    zIndex: 2
   }}>
     {
-      notifications.map(notification =>
-        <div>test</div>
+      notifications.map((notification, i) => {
+        // Get the data out of a notification
+        let { start_time, duration, title } = notification.event;
+        // Convert so that it can be used with the library
+        start_time = dayjs.unix(start_time);
+        // Calculate the time the event ends at
+        const end_time = start_time.add(duration, "seconds");
+
+        const notification_element = <div style={{
+          width: "40vw",
+          minWidth: "250px"
+        }}>
+          <span>You have been invited to "{title}"</span>
+          <div className="container-fluid mt-2">
+            <div className="row justify-content-around">
+              <Button variant="success" className="col-5">Accept</Button>
+              <Button variant="danger" className="col-5">Reject</Button>
+            </div>
+
+          </div>
+        </div>;
+
+        const is_last_element = i === number_of_items - 1;
+
+        return <div key={i}>
+          {notification_element}
+          {/* Show a separating bar */}
+          {is_last_element ? null : <hr />}
+        </div>;
+      }
       )
     }
   </div>;

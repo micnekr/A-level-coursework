@@ -8,6 +8,6 @@ use crate::{data::session::use_session, endpoints::EndpointError};
 pub async fn get_notifications(session: Session) -> Result<impl Responder, EndpointError> {
     use_session!(session, user);
 
-    let notificatons = vec![3, 4];
+    let notificatons: Vec<usize> = vec![];
     Ok(Json(notificatons))
 }
