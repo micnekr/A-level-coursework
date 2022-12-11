@@ -133,6 +133,15 @@ async fn main() -> std::io::Result<()> {
                     ReactElement::COMPONENT("PageContainerBox"),
                 ],
             ))
+            .service(create_session_protected_page(
+                "Friends",
+                "/friends",
+                &[
+                    ReactElement::PAGE("Friends"),
+                    ReactElement::COMPONENT("ErrorMessage"),
+                    ReactElement::COMPONENT("PageContainerBox"),
+                ],
+            ))
     })
     // set up openssl for use
     .bind_openssl(allowed_origin.clone(), ssl_builder)?;

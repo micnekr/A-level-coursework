@@ -2,6 +2,10 @@
 
 pub mod sql_types {
     #[derive(diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "participation_type"))]
+    pub struct ParticipationType;
+
+    #[derive(diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "recurrence_type"))]
     pub struct RecurrenceType;
 
@@ -27,10 +31,14 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::ParticipationType;
+
     events_participants (id) {
         id -> Int4,
         event_id -> Int4,
         participant_id -> Int4,
+        participation_type -> ParticipationType,
     }
 }
 

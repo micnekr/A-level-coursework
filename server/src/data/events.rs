@@ -1,7 +1,10 @@
 pub use diesel::{connection, prelude::*};
 use serde::{Deserialize, Serialize};
 
-use crate::schema::{events, events_participants};
+use crate::schema::{
+    events,
+    events_participants::{self, participation_type},
+};
 
 use super::{models::UnsavedModel, users::User};
 
@@ -16,6 +19,12 @@ pub enum RecurrenceType {
 pub enum VisibilityType {
     Public,
     Private,
+}
+#[derive(Serialize, Deserialize, PartialEq, Debug, diesel_derive_enum::DbEnum)]
+#[DieselTypePath = "crate::schema::sql_types::ParticipationType"]
+pub enum ParticipationType {
+    Invited,
+    Accepted,
 }
 
 #[derive(Insertable)]
@@ -53,6 +62,7 @@ pub struct Event {
 pub struct EventParticipant {
     pub id: i32,
     event_id: i32,
+    participation_type: ParticipationType,
     participant_id: i32,
 }
 
@@ -71,7 +81,12 @@ impl Event {
         // Query all the events where the user is a participant
         let mut events_as_participant = events::table
             .inner_join(events_participants::table)
-            .filter(events_participants::participant_id.eq(user.id))
+            .filter(
+                // Has to be a participant and should have accepted the invitation
+                events_participants::participant_id
+                    .eq(user.id)
+                    .and(participation_type.eq(ParticipationType::Accepted)),
+            )
             .select(events::all_columns)
             .load::<Event>(connection)?;
 
