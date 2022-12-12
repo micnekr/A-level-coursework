@@ -34,7 +34,7 @@ function Friends() {
 
     {/* A button to add a new group */}
     <Button className="d-block mx-auto" variant="outline-primary" style={{ cursor: "pointer" }}>
-      <img src="/img/plus.png" style={{ height: "1rem", }} /> New group
+      <i className="fas fa-plus" /> New group
     </Button>
 
     {/* A button to add a new friend */}
@@ -52,7 +52,7 @@ function Friends() {
       </div>
     </div>
     <ErrorMessage em={overall_em} />
-  </PageContainerBox>;
+  </PageContainerBox >;
 }
 
 /** An element of the page that shows the name of a friendship group and users, letting the users be added or deleted
@@ -66,15 +66,13 @@ function FriendshipGroup(props) {
   // What is the name of the friend to be added to the list?
   const [new_username, set_new_username] = useState("");
 
-  useEffect(() => console.log(new_username));
-
   return <div className="container border rounded py-2 mb-2" >
     <div className="row">
       <div className="col">
         <span className="ps-3">
           {name}
         </span>
-        <img className="ps-1 d-inline-block" src="/img/edit-icon.png" style={{ height: "1rem", cursor: "pointer" }}></img>
+        <i className="far fa-edit ps-2" data-fa-transform="grow-10 up-1" style={{ cursor: "pointer" }} />
       </div>
     </div>
     {/* Display the different participants */}
@@ -82,11 +80,12 @@ function FriendshipGroup(props) {
       {participants.map((name, i) => <div className="col-6 col-md-2" key={i}>
         <div className="text-center border rounded">
           <div className="align-middle d-inline-block text-truncate" style={{ maxWidth: "70%" }}>{name}</div>
-          <img className="align-middle ps-1 d-inline-block ms-auto" src="/img/cross.png" style={{ height: "1rem", cursor: "pointer" }}></img>
+          <i className="fas fa-times ps-1" style={{ cursor: "pointer" }} data-fa-transform="grow-5 down-4" />
         </div>
       </div>)}
-      <div className="col-1">
-        <img src="/img/plus.png" style={{ height: "1rem", cursor: "pointer" }} onClick={() => set_is_showing_popup(!is_showing_popup)} />
+      {/* Toggle the popup on click */}
+      <div className="col-1" onClick={() => set_is_showing_popup(!is_showing_popup)} >
+        <i className="fas fa-plus ps-1" style={{ cursor: "pointer" }} data-fa-transform="grow-5 down-4" />
       </div>
       {/* Show a popup to add a friend when this button is clicked */}
       {!is_showing_popup ? null :
