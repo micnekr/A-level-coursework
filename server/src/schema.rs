@@ -21,24 +21,12 @@ diesel::table! {
 
     events (id) {
         id -> Int4,
-        owner_id -> Int4,
         title -> Varchar,
         visibility -> VisibilityType,
         start_time -> Int4,
         duration -> Int4,
         recurrence -> RecurrenceType,
-    }
-}
-
-diesel::table! {
-    use diesel::sql_types::*;
-    use super::sql_types::ParticipationType;
-
-    events_participants (id) {
-        id -> Int4,
-        event_id -> Int4,
-        participant_id -> Int4,
-        participation_type -> ParticipationType,
+        group_id -> Int4,
     }
 }
 
@@ -51,6 +39,26 @@ diesel::table! {
 }
 
 diesel::table! {
+    groups (id) {
+        id -> Int4,
+        name -> Varchar,
+        owner_id -> Int4,
+    }
+}
+
+diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::ParticipationType;
+
+    groups_participants (id) {
+        id -> Int4,
+        group_id -> Int4,
+        participant_id -> Int4,
+        participation_type -> ParticipationType,
+    }
+}
+
+diesel::table! {
     users (id) {
         id -> Int4,
         username -> Varchar,
@@ -58,13 +66,15 @@ diesel::table! {
     }
 }
 
-diesel::joinable!(events -> users (owner_id));
-diesel::joinable!(events_participants -> events (event_id));
-diesel::joinable!(events_participants -> users (participant_id));
+diesel::joinable!(events -> groups (group_id));
+diesel::joinable!(groups -> users (owner_id));
+diesel::joinable!(groups_participants -> groups (group_id));
+diesel::joinable!(groups_participants -> users (participant_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     events,
-    events_participants,
     friendships,
+    groups,
+    groups_participants,
     users,
 );

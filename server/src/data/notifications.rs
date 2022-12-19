@@ -5,8 +5,7 @@ use super::{
 use diesel::BoolExpressionMethods;
 use diesel::RunQueryDsl;
 
-use crate::schema::events;
-use crate::schema::events_participants;
+use crate::schema::{events, groups, groups_participants};
 use diesel::ExpressionMethods;
 use diesel::{PgConnection, QueryDsl};
 use serde::Serialize;
@@ -27,13 +26,14 @@ impl Notification {
         user: &User,
     ) -> Result<Vec<Notification>, diesel::result::Error> {
         // Fetch all the events which have no response to display a corresponding notification
-        let events_without_response = events::table
-            .inner_join(events_participants::table)
+        let events_without_response = groups::table
+            .inner_join(groups_participants::table)
+            .inner_join(events::table)
             .filter(
                 // Has to be a participant and should have accepted the invitation
-                events_participants::participant_id
+                groups_participants::participant_id
                     .eq(user.id)
-                    .and(events_participants::participation_type.eq(ParticipationType::NoResponse)),
+                    .and(groups_participants::participation_type.eq(ParticipationType::NoResponse)),
             )
             .select(events::all_columns)
             .load::<Event>(connection)?;

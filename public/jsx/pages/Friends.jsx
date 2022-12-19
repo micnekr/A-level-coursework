@@ -18,16 +18,20 @@ function Friends() {
       participants: ["George"]
     }];
 
-    set_overall_em("Some error that might occur");
+    set_overall_em("");
 
     set_friendship_groups(friendship_group_data);
 
-    request("/api/get_friends", set_friends);
+    refresh_friends_list();
   }, [])
+
+  function refresh_friends_list() {
+    request("/api/get_friends", set_friends);
+  }
 
   /** A function to add a friend by username
   */
-  async function addFriend() {
+  async function add_friend() {
     // Remove the error so that the user can see the new error or the fact that there is no error
     set_overall_em("");
     const res = await f("/api/add_friend", "POST", {
@@ -40,6 +44,8 @@ function Friends() {
       const error = await res.text();
       return set_overall_em(error);
     }
+
+    refresh_friends_list();
   }
 
   return <PageContainerBox>
@@ -61,7 +67,7 @@ function Friends() {
           <input className="border rounded px-2 h-100 w-100" type="text" placeholder="Friend username" value={new_friend_username} onChange={e => set_new_friend_username(e.target.value)} />
         </div>
         <div className="col-sm-4 col-12">
-          <Button className="h-100 w-100" variant="primary" type="submit" onClick={addFriend}>
+          <Button className="h-100 w-100" variant="primary" type="submit" onClick={add_friend}>
             Add
           </Button>
         </div>
@@ -111,10 +117,10 @@ function FriendshipGroup(props) {
               <Form.Select value={new_username} onChange={e => set_new_username(e.target.value)}>
                 {/* Only show the default option if no valid person was selected */}
                 {new_username === "" ?
-                  <option>Please select a person</option> : null
+                  <option>Please select a friend</option> : null
                 }
                 {friends.map((friend, i) =>
-                  <option value={friend} key={i}>{friend}</option>
+                  <option value={friend.username} key={i}>{friend.username}</option>
                 )}
               </Form.Select>
             </div>

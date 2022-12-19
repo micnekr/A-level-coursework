@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     data::{
         events::{Event, RecurrenceType, UnsavedEvent, VisibilityType},
+        group::Group,
         models::UnsavedModel,
         session::use_session,
     },
@@ -52,6 +53,7 @@ pub struct CreateEventRequest {
     pub start_time: i32,
     pub duration: i32,
     pub recurrence: RecurrenceType,
+    pub group_id: i32,
 }
 
 /// An API endpoint used to create an event
@@ -63,37 +65,58 @@ pub async fn create_event(
 ) -> Result<&'static str, EndpointError> {
     use_session!(session, user);
 
-    let CreateEventRequest {
-        title,
-        visibility,
-        recurrence,
-        start_time,
-        duration,
-    } = req_body.0;
-
-    let event = UnsavedEvent {
-        owner_id: user.id,
-        title,
-        visibility,
-        recurrence,
-        start_time,
-        duration,
-    };
-
     // Get the connection from the mutex
     let mut connection = server_state
         .connection
         .lock()
         .expect("Could not get the connection from ServerState");
 
-    match event.save(&mut connection) {
-        Ok(_) => Ok("Success!"),
-        Err(err) => {
-            // Generic error
+    let CreateEventRequest {
+        title,
+        visibility,
+        recurrence,
+        start_time,
+        duration,
+        group_id,
+    } = req_body.0;
 
-            // Log the error
-            log::error!("events.create_event.save: {}", err);
-            Result::Err(EndpointError::InternalError)
+    // check that the user has admin rights over the group
+    let group = Group::get_group_by_id(&mut connection, group_id);
+    match group {
+        Err(err) => {
+            // log the error
+            log::error!("events.create_event.find_group: {}", err);
+            Err(EndpointError::InternalError)
+        }
+        // If the group was not found
+        Ok(None) => Err(EndpointError::BadClientData("This group does not exist")),
+        Ok(Some(group)) => {
+            // If the user is not the owner
+            if group.owner_id != user.id {
+                return Err(EndpointError::BadClientData(
+            "You are not the group owner and so do not have the permission to create events.",
+        ));
+            }
+
+            let event = UnsavedEvent {
+                title,
+                visibility,
+                recurrence,
+                start_time,
+                duration,
+                group_id,
+            };
+
+            match event.save(&mut connection) {
+                Ok(_) => Ok("Success!"),
+                Err(err) => {
+                    // Generic error
+
+                    // Log the error
+                    log::error!("events.create_event.save: {}", err);
+                    Result::Err(EndpointError::InternalError)
+                }
+            }
         }
     }
 }
