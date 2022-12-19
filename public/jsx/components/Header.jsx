@@ -100,6 +100,8 @@ function NotificationIcon(props) {
   const [show_notifications, set_show_notifications] = useState(false);
 
   function toggle_show_notification() {
+    // only show the notifications if there are some available
+    if (notifications.length == 0) return;
     set_show_notifications(!show_notifications);
   }
 
