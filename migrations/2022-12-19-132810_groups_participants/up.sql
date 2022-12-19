@@ -7,5 +7,7 @@ CREATE TABLE groups_participants (
   participant_id INT NOT NULL,
   participation_type participation_type NOT NULL,
   FOREIGN KEY(group_id) REFERENCES groups(id),
-  FOREIGN KEY(participant_id) REFERENCES users(id)
+  FOREIGN KEY(participant_id) REFERENCES users(id),
+
+  CONSTRAINT unique_participants UNIQUE (group_id, participant_id)
 )

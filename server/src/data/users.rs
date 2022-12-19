@@ -22,6 +22,7 @@ pub struct UnsavedUser {
 #[derive(Serialize)]
 pub struct UserPublic {
     pub username: String,
+    pub id: i32,
 }
 
 #[derive(Identifiable, Queryable, Debug)]
@@ -62,6 +63,7 @@ impl User {
     /// Convert to the public version
     pub fn to_public(self) -> UserPublic {
         UserPublic {
+            id: self.id,
             username: self.username,
         }
     }
