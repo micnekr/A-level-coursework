@@ -88,6 +88,8 @@ async fn main() -> std::io::Result<()> {
             .service(endpoints::notifications::get_notifications)
             .service(endpoints::events::get_events)
             .service(endpoints::events::create_event)
+            .service(endpoints::friends::get_friends)
+            .service(endpoints::friends::add_friend)
             // Serving files
             // Serve the static css and js files
             .service(actix_files::Files::new("/css", "public/css").show_files_listing())

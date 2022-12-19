@@ -25,6 +25,7 @@ pub enum VisibilityType {
 pub enum ParticipationType {
     Invited,
     Accepted,
+    NoResponse,
 }
 
 #[derive(Insertable)]

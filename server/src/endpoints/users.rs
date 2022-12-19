@@ -53,6 +53,7 @@ pub async fn signup(
             // Check if the error is due a username uniqueness constraint violation
             if let Error::DatabaseError(diesel::result::DatabaseErrorKind::UniqueViolation, _) = err
             {
+                log::warn!("users.signup.save.taken: {}", err);
                 // Tell the client to use a unique username
                 Result::Err(EndpointError::BadClientData(
                     "This username is taken. Try using a different username.",

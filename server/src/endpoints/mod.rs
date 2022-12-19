@@ -1,4 +1,5 @@
 pub mod events;
+pub mod friends;
 pub mod notifications;
 pub mod users;
 use actix_web::{error, http::StatusCode, HttpResponse};

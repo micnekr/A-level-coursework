@@ -5,29 +5,12 @@ const Image = ReactBootstrap.Image;
  */
 function Header() {
   const [is_logged_in, set_is_logged_in] = useState(false);
-  const [notifications, set_notifications] = useState([
-    { event: { start_time: 1669220852401, duration: 3600, title: "Some event", participants: [] } },
-    {
-      event: { start_time: 1669220952401, duration: 3600, title: "Some other event", participants: [] },
-    }
-  ]);
-
-  /// Request an endpoint and call the setter with the data returned
-  async function request(endpoint, setter) {
-    const res = await f(endpoint, "GET");
-
-    // Log the error if something went wrong and do not proceed
-    if (res.status >= 400) return console.error("Error within a response:", res);
-
-    const data = await res.json();
-
-    setter(data);
-  }
+  const [notifications, set_notifications] = useState([]);
 
   // Check if logged in when the page is loaded and load notification count
   useEffect(() => {
     request("/api/is_logged_in", set_is_logged_in);
-    // request("/api/get_notifications", set_notifications);
+    request("/api/get_notifications", set_notifications);
   }, []);
 
   // A list of buttons to show only when the user is logged in

@@ -43,6 +43,14 @@ diesel::table! {
 }
 
 diesel::table! {
+    friendships (id) {
+        id -> Int4,
+        owner_id -> Int4,
+        friend_id -> Int4,
+    }
+}
+
+diesel::table! {
     users (id) {
         id -> Int4,
         username -> Varchar,
@@ -57,5 +65,6 @@ diesel::joinable!(events_participants -> users (participant_id));
 diesel::allow_tables_to_appear_in_same_query!(
     events,
     events_participants,
+    friendships,
     users,
 );

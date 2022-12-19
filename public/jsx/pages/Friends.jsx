@@ -5,6 +5,7 @@ function Friends() {
   const [overall_em, set_overall_em] = useState("");
   const [friendship_groups, set_friendship_groups] = useState([]);
   const [friends, set_friends] = useState([]);
+  const [new_friend_username, set_new_friend_username] = useState("");
 
   // Fetch the data from the server
   useEffect(() => {
@@ -17,14 +18,29 @@ function Friends() {
       participants: ["George"]
     }];
 
-    const friends_data = ["John", "some very long name", "George", "Someone else"];
-
     set_overall_em("Some error that might occur");
 
     set_friendship_groups(friendship_group_data);
-    set_friends(friends_data);
 
+    request("/api/get_friends", set_friends);
   }, [])
+
+  /** A function to add a friend by username
+  */
+  async function addFriend() {
+    // Remove the error so that the user can see the new error or the fact that there is no error
+    set_overall_em("");
+    const res = await f("/api/add_friend", "POST", {
+      username: new_friend_username
+    });
+
+    // if it was not successful, show the error message
+    if (res.status >= 400) {
+      // Read the error message
+      const error = await res.text();
+      return set_overall_em(error);
+    }
+  }
 
   return <PageContainerBox>
     <h2 className="mx-auto text-center">Friendship groups</h2>
@@ -42,10 +58,10 @@ function Friends() {
     <div className="container-fluid p-0">
       <div className="row justify-content-between gy-3">
         <div className="col-sm-8 col-12">
-          <input className="border rounded px-2 h-100 w-100" type="text" placeholder="Friend username" />
+          <input className="border rounded px-2 h-100 w-100" type="text" placeholder="Friend username" value={new_friend_username} onChange={e => set_new_friend_username(e.target.value)} />
         </div>
         <div className="col-sm-4 col-12">
-          <Button className="h-100 w-100" variant="primary" type="submit">
+          <Button className="h-100 w-100" variant="primary" type="submit" onClick={addFriend}>
             Add
           </Button>
         </div>

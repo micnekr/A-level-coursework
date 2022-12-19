@@ -38,7 +38,7 @@ pub async fn get_events(
         Ok(events) => Ok(Json(GetEventsResponse { events })),
         Err(err) => {
             // Log the error
-            log::error!("events.get_events.database: {}", err);
+            log::error!("events.get_events.get: {}", err);
             Result::Err(EndpointError::InternalError)
         }
     }

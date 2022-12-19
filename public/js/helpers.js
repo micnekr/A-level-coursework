@@ -44,3 +44,15 @@ function to_ordinal(number) {
         : last_digit === "3" ? "rd" : "th";
   return str + suffix;
 }
+
+/// Request an endpoint and call the setter with the data returned
+async function request(endpoint, setter) {
+  const res = await f(endpoint, "GET");
+
+  // Log the error if something went wrong and do not proceed
+  if (res.status >= 400) return console.error("Error within a response:", res);
+
+  const data = await res.json();
+
+  setter(data);
+}

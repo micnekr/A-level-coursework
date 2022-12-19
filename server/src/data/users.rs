@@ -17,7 +17,14 @@ pub struct UnsavedUser {
     pub password_hash: String,
 }
 
-#[derive(Identifiable, Queryable, Debug, Serialize)]
+/// A version of the user struct that can be sent to the frontend, i.e. it does not disclose
+/// sensitive information
+#[derive(Serialize)]
+pub struct UserPublic {
+    pub username: String,
+}
+
+#[derive(Identifiable, Queryable, Debug)]
 /// A user struct that represents a user record in a database
 pub struct User {
     pub id: i32,
@@ -52,6 +59,13 @@ impl UnsavedModel<User> for UnsavedUser {
 }
 
 impl User {
+    /// Convert to the public version
+    pub fn to_public(self) -> UserPublic {
+        UserPublic {
+            username: self.username,
+        }
+    }
+
     /// A function that loads a user from the database and checks the password hash
     pub fn fetch_check(
         connection: &mut PgConnection,
