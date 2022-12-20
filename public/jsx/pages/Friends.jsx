@@ -109,6 +109,10 @@ function Friends() {
     const { group, friends } = props;
     const { name, participants } = group;
 
+    // Is editing the group name?
+    const [is_editing_name, set_is_editing_name] = useState(false);
+    const [new_name, set_new_name] = useState("");
+
     // Is it showing the form to add a new friend to the list?
     const [is_showing_popup, set_is_showing_popup] = useState(false);
     // What is the name of the friend to be added to the list?
@@ -133,13 +137,76 @@ function Friends() {
       refresh_groups_list();
     }
 
+    /** A function to change the name of a group
+    */
+    async function rename_group(group_id, new_name) {
+      const res = await f("/api/rename_group", "POST", {
+        group_id,
+        new_name
+      });
+
+      // if it was not successful, show the error message
+      if (res.status >= 400) {
+        // Read the error message
+        const error = await res.text();
+        return set_overall_em(error);
+      }
+
+      refresh_groups_list();
+    }
+
+    /** A function to remove a user from a group
+    */
+    async function remove_user_from_group(user_id, group_id) {
+      const res = await f("/api/remove_user_from_group", "POST", {
+        group_id,
+        user_id
+      });
+
+      // if it was not successful, show the error message
+      if (res.status >= 400) {
+        // Read the error message
+        const error = await res.text();
+        return set_overall_em(error);
+      }
+
+      refresh_groups_list();
+    }
+
+
     return <div className="container border rounded py-2 mb-2" >
       <div className="row">
-        <div className="col">
-          <span className="ps-3">
-            {name}
-          </span>
-          <i className="far fa-edit ps-2" data-fa-transform="grow-10 up-1" style={{ cursor: "pointer" }} />
+        <div className="col" >
+          <div style={{
+            // Only show if editing
+            display: is_editing_name ? undefined : "none"
+          }}>
+            <input className="border rounded mb-1" value={new_name} onChange={e => set_new_name(e.target.value)} />
+            <span onClick={() => {
+              // stop editing and set the new name
+              set_is_editing_name(false);
+              rename_group(group.id, new_name);
+            }}>
+              <i className="fas fa-check ps-2" data-fa-transform="grow-10 up-1" style={{ cursor: "pointer" }} />
+            </span>
+          </div>
+          {/* : */}
+          <div style={{
+            // Only show if not editing
+            display: is_editing_name ? "none" : undefined
+          }}>
+            <span className="ps-3">
+              {name}
+            </span>
+            <span onClick={() => {
+              // Start editing the name, set the default name to the current name
+              set_is_editing_name(true);
+              set_new_name(name);
+            }}>
+              <i className="far fa-edit ps-2" data-fa-transform="grow-10 up-1" style={{ cursor: "pointer" }} />
+            </span>
+          </div>
+          {/* } */}
         </div>
       </div>
       {/* Display the different participants */}
@@ -147,7 +214,12 @@ function Friends() {
         {participants.map((user, i) => <div className="col-6 col-md-2" key={i}>
           <div className="text-center border rounded">
             <div className="align-middle d-inline-block text-truncate" style={{ maxWidth: "70%" }}>{user.username}</div>
-            <i className="fas fa-times ps-1" style={{ cursor: "pointer" }} data-fa-transform="grow-5 down-4" />
+            <span onClick={() => {
+              // Remove this user from the group
+              remove_user_from_group(user.user_id, user.group_id);
+            }}>
+              <i className="fas fa-times ps-1" style={{ cursor: "pointer" }} data-fa-transform="grow-5 down-4" />
+            </span>
           </div>
         </div>)}
         {/* Toggle the popup on click */}
@@ -188,6 +260,6 @@ function Friends() {
             </div>
           </div>}
       </div>
-    </div>
+    </div >
   }
 }

@@ -92,6 +92,37 @@ impl Group {
     ) -> Result<Option<Self>, diesel::result::Error> {
         groups::table.find(group_id).first(connection).optional()
     }
+
+    pub fn rename_group_by_id(
+        connection: &mut PgConnection,
+        group_id: i32,
+        user: &User,
+        new_name: String,
+    ) -> QueryResult<Group> {
+        diesel::update(groups::table)
+            .filter(
+                // Only allow the owner edit the group
+                groups::owner_id.eq(user.id).and(groups::id.eq(group_id)),
+            )
+            .set(groups::name.eq(new_name))
+            .get_result(connection)
+    }
+
+    /// A function to remove a user from a group. Does not consider permissions
+    pub fn remove_user(
+        connection: &mut PgConnection,
+        group: &Group,
+        user_id: i32,
+    ) -> QueryResult<usize> {
+        diesel::delete(groups_participants::table)
+            .filter(
+                // Remove an entry with the correct group and user
+                groups_participants::group_id
+                    .eq(group.id)
+                    .and(groups_participants::participant_id.eq(user_id)),
+            )
+            .execute(connection)
+    }
 }
 
 impl UnsavedModel<Group> for UnsavedGroup {

@@ -24,6 +24,18 @@ pub struct InviteToGroupRequest {
     group_id: i32,
 }
 
+#[derive(Deserialize)]
+pub struct RenameGroupRequest {
+    group_id: i32,
+    new_name: String,
+}
+
+#[derive(Deserialize)]
+pub struct RemoveUserFromGroupRequest {
+    group_id: i32,
+    user_id: i32,
+}
+
 #[derive(Serialize)]
 /// A struct that represents the response to get owned groups and participants
 pub struct GetOwnedGroupsWithParticipantsResponse {
@@ -130,7 +142,7 @@ pub async fn invite_to_group(
         Ok(Some(group)) => {
             if group.owner_id != user.id {
                 return Err(EndpointError::BadClientData(
-            "You are not the group owner and so do not have the permission to create events."));
+            "You are not the group owner and so do not have the permission to invite users to the group."));
             }
             // Create a relationship between the user and the group
             let group_participant = UnsavedGroupParticipant {
@@ -146,6 +158,81 @@ pub async fn invite_to_group(
                 Err(err) => {
                     // log the error
                     log::error!("groups.invite_to_group.save: {}", err);
+                    Err(EndpointError::InternalError)
+                }
+                Ok(_) => Ok("Success!"),
+            }
+        }
+    }
+}
+
+/// An API endpoint used to rename a group
+#[post("/api/rename_group")]
+pub async fn rename_group(
+    session: Session,
+    req_body: Json<RenameGroupRequest>,
+    server_state: actix_web::web::Data<ServerState>,
+) -> Result<&'static str, EndpointError> {
+    use_session!(session, user);
+
+    let RenameGroupRequest { group_id, new_name } = req_body.0;
+
+    // Get the connection from the mutex
+    let mut connection = server_state
+        .connection
+        .lock()
+        .expect("Could not get the connection from ServerState");
+
+    let update_result = Group::rename_group_by_id(&mut connection, group_id, &user, new_name);
+
+    match update_result {
+        Err(err) => {
+            // Log the error
+            log::error!("groups.rename_group.update: {}", err);
+            Err(EndpointError::InternalError)
+        }
+        Ok(_) => Ok("Success!"),
+    }
+}
+
+/// An API endpoint to remove a user from a group
+#[post("/api/remove_user_from_group")]
+pub async fn remove_user_from_group(
+    session: Session,
+    req_body: Json<RemoveUserFromGroupRequest>,
+    server_state: actix_web::web::Data<ServerState>,
+) -> Result<&'static str, EndpointError> {
+    use_session!(session, user);
+
+    let RemoveUserFromGroupRequest { group_id, user_id } = req_body.0;
+
+    // Get the connection from the mutex
+    let mut connection = server_state
+        .connection
+        .lock()
+        .expect("Could not get the connection from ServerState");
+
+    let group = Group::get_group_by_id(&mut connection, group_id);
+    match group {
+        Err(err) => {
+            // log the error
+            log::error!("groups.remove_user_from_group.find_group: {}", err);
+            Err(EndpointError::InternalError)
+        }
+        // If the group was not found
+        Ok(None) => Err(EndpointError::BadClientData("This group does not exist")),
+        Ok(Some(group)) => {
+            if group.owner_id != user.id {
+                return Err(EndpointError::BadClientData(
+            "You are not the group owner and so do not have the permission to remove users from groups."));
+            }
+
+            let update_result = Group::remove_user(&mut connection, &group, user_id);
+
+            match update_result {
+                Err(err) => {
+                    // Log the error
+                    log::error!("groups.remove_user_from_group.update: {}", err);
                     Err(EndpointError::InternalError)
                 }
                 Ok(_) => Ok("Success!"),

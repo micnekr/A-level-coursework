@@ -93,6 +93,8 @@ async fn main() -> std::io::Result<()> {
             .service(endpoints::groups::get_owned_groups_with_participants)
             .service(endpoints::groups::create_group)
             .service(endpoints::groups::invite_to_group)
+            .service(endpoints::groups::rename_group)
+            .service(endpoints::groups::remove_user_from_group)
             // Serving files
             // Serve the static css and js files
             .service(actix_files::Files::new("/css", "public/css").show_files_listing())
