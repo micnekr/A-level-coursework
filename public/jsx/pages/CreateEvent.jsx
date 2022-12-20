@@ -14,10 +14,12 @@ function CreateEvent() {
     return dayjs(time, "YYYY-MM-DDTHH:mm");
   }
 
+
   // Have variables to keep track of the state
   const [title, set_title] = useState("");
   const [recurrence, set_recurrence] = useState("Weekly");
   const [visibility, set_visibility] = useState("Private");
+  const [group_id, set_group_id] = useState(-1); // represents an invalid group id
   const [start_time, set_start_time] = useState(time_now);
   const [end_time, set_end_time] = useState(time_now);
 
@@ -25,6 +27,19 @@ function CreateEvent() {
   const [title_em, set_title_em] = useState("");
   const [time_em, set_time_em] = useState("");
   const [overall_em, set_overall_em] = useState("");
+
+  const [groups, set_groups] = useState([]);
+
+  // Load the groups once ready
+  useEffect(() => {
+    request("/api/get_owned_groups_with_participants", (data) => {
+      const groups = data.groups.map(el => ({ name: el.name, id: el.id }));
+      set_groups(groups);
+      // Set the group id to the first group id
+      set_group_id(groups[0].id);
+    });
+  }, []);
+
 
   // Remove the error messages when typing
   useEffect(() => {
@@ -105,6 +120,21 @@ function CreateEvent() {
         </Form.Select>
       </Form.Group>
 
+      <Form.Group className="mb-3" controlId="formBasicGroup">
+        <Form.Label>What group is this activity for?</Form.Label>
+        <Form.Select value={group_id} onChange={e => {
+          // convert to an integer
+          set_group_id(parseInt(e.target.value));
+        }}>
+          {/* An option for each group */}
+          {
+            groups.map((group, i) =>
+              <option value={group.id} key={i}>{group.name}</option>
+            )
+          }
+        </Form.Select>
+      </Form.Group>
+
       <ErrorMessage em={overall_em} />
       <Button variant="primary" onClick={submit}>
         Done
@@ -126,6 +156,7 @@ function CreateEvent() {
       title,
       visibility,
       recurrence,
+      group_id,
       start_time: start_time.unix(),
       duration: end_time.unix() - start_time.unix(),
     });

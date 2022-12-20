@@ -33,7 +33,7 @@ pub async fn get_events(
         .lock()
         .expect("Could not get the connection from ServerState");
 
-    let events = Event::get_events_with_user(&mut connection, &user);
+    let events = Event::get_accepted_events_with_user(&mut connection, &user);
 
     match events {
         Ok(events) => Ok(Json(GetEventsResponse { events })),

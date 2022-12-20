@@ -41,6 +41,7 @@ diesel::table! {
 diesel::table! {
     groups (id) {
         id -> Int4,
+        is_special -> Bool,
         name -> Varchar,
         owner_id -> Int4,
     }

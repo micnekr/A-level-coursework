@@ -4,7 +4,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     data::{
-        group::{Group, UnsavedGroup, UnsavedGroupParticipant, UserParticipationData},
+        group::{
+            Group, ParticipationType, UnsavedGroup, UnsavedGroupParticipant, UserParticipationData,
+        },
         models::UnsavedModel,
         session::use_session,
     },
@@ -34,6 +36,12 @@ pub struct RenameGroupRequest {
 pub struct RemoveUserFromGroupRequest {
     group_id: i32,
     user_id: i32,
+}
+
+#[derive(Deserialize)]
+pub struct ReplyToGroupInvitationRequest {
+    was_accepted: bool,
+    group_id: i32,
 }
 
 #[derive(Serialize)]
@@ -98,6 +106,7 @@ pub async fn create_group(
     let group = UnsavedGroup {
         name,
         owner_id: user.id,
+        is_special: false,
     };
 
     let group = group.save(&mut connection);
@@ -148,7 +157,7 @@ pub async fn invite_to_group(
             let group_participant = UnsavedGroupParticipant {
                 group_id,
                 participant_id: user_id,
-                participation_type: crate::data::events::ParticipationType::NoResponse,
+                participation_type: ParticipationType::NoResponse,
             };
 
             // Try to save it
@@ -237,6 +246,42 @@ pub async fn remove_user_from_group(
                 }
                 Ok(_) => Ok("Success!"),
             }
+        }
+    }
+}
+
+/// An API endpoint to reply to an invitation to a group
+#[post("/api/reply_to_group_invitation")]
+pub async fn reply_to_group_invitation(
+    session: Session,
+    req_body: Json<ReplyToGroupInvitationRequest>,
+    server_state: actix_web::web::Data<ServerState>,
+) -> Result<&'static str, EndpointError> {
+    use_session!(session, user);
+
+    let ReplyToGroupInvitationRequest {
+        was_accepted,
+        group_id,
+    } = req_body.0;
+    let decision = if was_accepted {
+        ParticipationType::Accepted
+    } else {
+        ParticipationType::Rejected
+    };
+
+    // Get the connection from the mutex
+    let mut connection = server_state
+        .connection
+        .lock()
+        .expect("Could not get the connection from ServerState");
+
+    let result = Group::reply_to_group_invitation(&mut connection, group_id, &user, decision);
+    match result {
+        Ok(_) => Ok("Success!"),
+        Err(err) => {
+            // Log the error
+            log::error!("groups.radd_friendeply_to_group_invitation.update: {}", err);
+            Err(EndpointError::InternalError)
         }
     }
 }

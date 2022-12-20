@@ -3,7 +3,15 @@ use serde::{Deserialize, Serialize};
 
 use crate::schema::{groups, groups_participants, users};
 
-use super::{events::ParticipationType, models::UnsavedModel, users::User};
+use super::{models::UnsavedModel, users::User};
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, diesel_derive_enum::DbEnum)]
+#[DieselTypePath = "crate::schema::sql_types::ParticipationType"]
+pub enum ParticipationType {
+    Rejected,
+    Accepted,
+    NoResponse,
+}
 
 #[derive(Identifiable, Queryable, Associations, Debug, Serialize, Deserialize)]
 #[diesel(belongs_to(User, foreign_key = owner_id))]
@@ -11,6 +19,7 @@ use super::{events::ParticipationType, models::UnsavedModel, users::User};
 /// A struct that represents a group in the database
 pub struct Group {
     pub id: i32,
+    pub is_special: bool,
     pub name: String,
     pub owner_id: i32,
 }
@@ -19,6 +28,7 @@ pub struct Group {
 #[diesel(table_name = groups)]
 /// A group that has not been saved to the database yet
 pub struct UnsavedGroup {
+    pub is_special: bool,
     pub name: String,
     pub owner_id: i32,
 }
@@ -121,6 +131,23 @@ impl Group {
                     .eq(group.id)
                     .and(groups_participants::participant_id.eq(user_id)),
             )
+            .execute(connection)
+    }
+
+    /// A function that accepts or rejects an event for a user
+    pub fn reply_to_group_invitation(
+        connection: &mut PgConnection,
+        group_id: i32,
+        user: &User,
+        decision: ParticipationType,
+    ) -> QueryResult<usize> {
+        diesel::update(groups_participants::table)
+            .filter(
+                groups_participants::group_id
+                    .eq(group_id)
+                    .and(groups_participants::participant_id.eq(user.id)),
+            )
+            .set(groups_participants::participation_type.eq(decision))
             .execute(connection)
     }
 }

@@ -1,5 +1,6 @@
 use crate::{
     data::{
+        group::{ParticipationType, UnsavedGroup, UnsavedGroupParticipant},
         models::UnsavedModel,
         session::{get_session, set_session},
         users::User,
@@ -9,7 +10,7 @@ use crate::{
 };
 use actix_session::Session;
 use actix_web::{get, post, web::Json, Responder};
-use diesel::result::Error;
+use diesel::{result::Error, Connection};
 use serde::Deserialize;
 
 use crate::data::users::UnsavedUser;
@@ -44,8 +45,29 @@ pub async fn signup(
         .connection
         .lock()
         .expect("Could not get the connection from ServerState");
+
     // Try to save the user
-    let user = unsaved_user.save(&mut connection);
+    let user = connection.transaction::<User, _, _>(|connection| {
+        // save the actual user
+        let user = unsaved_user.save(connection)?;
+        // Create a group just for the user
+        let unsaved_group = UnsavedGroup {
+            name: String::from("Myself"),
+            owner_id: user.id,
+            is_special: true,
+        };
+
+        let group = unsaved_group.save(connection)?;
+        let participation = UnsavedGroupParticipant {
+            participation_type: ParticipationType::Accepted,
+            group_id: group.id,
+            participant_id: user.id,
+        };
+
+        participation.save(connection)?;
+
+        Ok(user)
+    });
 
     // See if it worked
     match user {

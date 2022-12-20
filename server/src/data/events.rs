@@ -3,7 +3,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::schema::{events, groups, groups_participants};
 
-use super::{group::Group, models::UnsavedModel, users::User};
+use super::{
+    group::{Group, ParticipationType},
+    models::UnsavedModel,
+    users::User,
+};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, diesel_derive_enum::DbEnum)]
 #[DieselTypePath = "crate::schema::sql_types::RecurrenceType"]
@@ -16,13 +20,6 @@ pub enum RecurrenceType {
 pub enum VisibilityType {
     Public,
     Private,
-}
-#[derive(Serialize, Deserialize, PartialEq, Debug, diesel_derive_enum::DbEnum)]
-#[DieselTypePath = "crate::schema::sql_types::ParticipationType"]
-pub enum ParticipationType {
-    Invited,
-    Accepted,
-    NoResponse,
 }
 
 #[derive(Insertable)]
@@ -66,20 +63,24 @@ impl Event {
     }
 
     /// get all events that the user participates in, without being an owner
-    pub fn get_events_participated_in_by_user(
+    pub fn get_accepted_events_participated_in_by_user(
         connection: &mut PgConnection,
         user: &User,
     ) -> QueryResult<Vec<Event>> {
         groups::table
             .inner_join(groups_participants::table)
             .inner_join(events::table)
-            .filter(groups_participants::participant_id.eq(user.id))
+            .filter(
+                groups_participants::participant_id
+                    .eq(user.id)
+                    .and(groups_participants::participation_type.eq(ParticipationType::Accepted)),
+            )
             .select(events::all_columns)
             .load::<Event>(connection)
     }
 
     /// A function that gets all events that a user needs to be aware of
-    pub fn get_events_with_user(
+    pub fn get_accepted_events_with_user(
         connection: &mut PgConnection,
         user: &User,
     ) -> Result<Vec<Event>, diesel::result::Error> {
@@ -88,7 +89,7 @@ impl Event {
 
         // Query all the events where the user is a participant
         let mut events_as_participant =
-            Event::get_events_participated_in_by_user(connection, user)?;
+            Event::get_accepted_events_participated_in_by_user(connection, user)?;
         // Merge the two vectors
         events_as_participant.extend(events_as_owner);
 

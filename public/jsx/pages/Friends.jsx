@@ -21,7 +21,7 @@ function Friends() {
   function refresh_groups_list() {
     request("/api/get_owned_groups_with_participants", (data) => {
       // reshape the data
-      const friendship_groups = data.groups.map(el => { return { name: el.name, id: el.id, participants: [] } });
+      const friendship_groups = data.groups.map(el => { return { name: el.name, id: el.id, is_special: el.is_special, participants: [] } });
       //
       // Add the users to their corresponding groups
       for (let user of data.participants) {
@@ -29,7 +29,8 @@ function Friends() {
         corresponding_group.participants.push(user);
       }
 
-      set_friendship_groups(friendship_groups);
+      // Remove the special groups, since the user should not manage them
+      set_friendship_groups(friendship_groups.filter(el => !el.is_special));
     });
   }
 
