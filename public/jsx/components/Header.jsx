@@ -27,7 +27,10 @@ function Header() {
       return console.error(error);
     }
 
-    // refresh the notifications
+    // Refresh the page if the group has been accepted to use the updated list
+    if (was_accepted) return window.location.reload();
+
+    // otherwise, refresh the notifications
     request("/api/get_notifications", set_notifications);
   }
 
