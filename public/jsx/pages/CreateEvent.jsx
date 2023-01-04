@@ -50,7 +50,8 @@ function CreateEvent() {
   }, [title, recurrence, visibility, start_time, end_time])
 
   return <PageContainerBox title="Create an event">
-    <Form>
+    {/* Disable form submission without clicking the button, as that refreshes the page without sending the data  */}
+    <Form onSubmit={e => e.preventDefault()}>
       <Form.Group className="mb-3" controlId="formBasicTitle">
         <Form.Label>Title</Form.Label>
         <Form.Control type="text" placeholder="Title" value={title} onChange={e => {
@@ -148,8 +149,13 @@ function CreateEvent() {
 
     // Check that the title is not empty
     if (title === "") return set_title_em("The title can not be empty");
+    const start_timestamp = start_time.unix()
+    const end_timestamp = end_time.unix()
+    const duration = end_timestamp - start_timestamp;
+
     // Check that the times are not empty, either
-    if (isNaN(start_time.unix()) || isNaN(end_time.unix())) return set_time_em("Please enter valid times");
+    if (isNaN(start_timestamp) || isNaN(end_timestamp)) return set_time_em("Please enter valid times");
+    if (duration < 60) return set_time_em("The event has to last at least 1 minute");
 
     // Make the actual request
     const res = await f("/api/create_event", "POST", {
@@ -157,8 +163,8 @@ function CreateEvent() {
       visibility,
       recurrence,
       group_id,
-      start_time: start_time.unix(),
-      duration: end_time.unix() - start_time.unix(),
+      start_time: start_timestamp,
+      duration
     });
 
     // if it was not successful, show the error message
