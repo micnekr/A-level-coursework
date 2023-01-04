@@ -50,7 +50,8 @@ function CreateEvent() {
   }, [title, recurrence, visibility, start_time, end_time])
 
   return <PageContainerBox title="Create an event">
-    <Form>
+    {/* Disable form submission without clicking the button, as that refreshes the page without sending the data  */}
+    <Form onSubmit={e => e.preventDefault()}>
       <Form.Group className="mb-3" controlId="formBasicTitle">
         <Form.Label>Title</Form.Label>
         <Form.Control type="text" placeholder="Title" value={title} onChange={e => {
