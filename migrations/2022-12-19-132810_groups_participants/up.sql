@@ -1,5 +1,5 @@
 -- Your SQL goes here
-CREATE TYPE participation_type AS ENUM ('invited', 'accepted', 'no_response');
+CREATE TYPE participation_type AS ENUM ('rejected', 'accepted', 'no_response');
 
 CREATE TABLE groups_participants (
   id SERIAL PRIMARY KEY,
