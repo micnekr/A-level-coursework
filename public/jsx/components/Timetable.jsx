@@ -91,8 +91,8 @@ function Timetable(props) {
                     return el.start_time.startOf("day").unix() === day_in_this_column.startOf("day").unix();
                   }
                 }
-                ).map((event, i) =>
-                  <TimetableEvent key={i} event={event} container_ref={div_timetable_column_refs[i]} />
+                ).map((event, j) =>
+                  <TimetableEvent key={j} event={event} container_ref={div_timetable_column_refs[i]} />
                 )
               }
             </div>

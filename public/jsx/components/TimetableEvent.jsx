@@ -2,7 +2,7 @@
  */
 function TimetableEvent(props) {
   const { container_ref, event } = props;
-  const { start_time, end_time, duration, title, participants } = event;
+  const { start_time, end_time, duration, title } = event;
 
   const beginning_of_day = start_time.startOf("day");
   const end_of_day = start_time.endOf("day");
