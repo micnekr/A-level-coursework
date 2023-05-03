@@ -5,6 +5,7 @@ function f(url, method, data) {
   return fetch(url, {
     method: method,
     credentials: "same-origin", // only send cookies for same-origin requests
+    // We are using JSON
     headers: {
       "content-type": "application/json",
       accept: "application/json",

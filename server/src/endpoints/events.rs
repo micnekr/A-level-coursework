@@ -34,6 +34,7 @@ pub async fn get_events(
 
     let events = Event::get_events_with_user(&mut connection, &user);
 
+    // If the events are found, send them to the frontend
     match events {
         Ok(events) => Ok(Json(GetEventsResponse { events })),
         Err(err) => {
@@ -63,6 +64,7 @@ pub async fn create_event(
 ) -> Result<&'static str, EndpointError> {
     use_session!(session, user);
 
+    // Get the data from the request
     let CreateEventRequest {
         title,
         visibility,
@@ -86,6 +88,7 @@ pub async fn create_event(
         .lock()
         .expect("Could not get the connection from ServerState");
 
+    // Try to save the event
     match event.save(&mut connection) {
         Ok(_) => Ok("Success!"),
         Err(err) => {

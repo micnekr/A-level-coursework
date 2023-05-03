@@ -20,6 +20,8 @@ pub mod page_template;
 pub mod schema;
 pub mod settings;
 
+/// A struct that contains the data about the state of the servserside code; it is passed onto the endpoints
+/// For example, most endpoints need access the database, and so need the connection to be stored here
 pub struct ServerState {
     pub connection: Mutex<PgConnection>,
 }
