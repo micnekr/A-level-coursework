@@ -9,3 +9,5 @@
 Replace the <placeholders> with names of your choice
 3. Generate a diesel database
 `diesel database reset`
+4. Generate the session key
+`cargo run --bin generate_session_key`

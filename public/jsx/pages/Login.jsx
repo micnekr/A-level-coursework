@@ -64,7 +64,7 @@ function Login() {
         }
 
 
-        // Otherwise, refirect to the calendar page
-        window.location.href = "/calendar";
-    }
+    // Otherwise, refirect to the calendar page
+    window.location.href = "/";
+  }
 }

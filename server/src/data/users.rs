@@ -17,7 +17,7 @@ pub struct UnsavedUser {
     pub password_hash: String,
 }
 
-#[derive(Queryable, Debug, Serialize)]
+#[derive(Identifiable, Queryable, Debug, Serialize)]
 /// A user struct that represents a user record in a database
 pub struct User {
     pub id: i32,
@@ -26,11 +26,15 @@ pub struct User {
 }
 
 impl UnsavedUser {
+    /// creates a password hash for the user using the salt and the hashing algorithm
     pub fn hash(text: &str) -> password_hash::Result<String> {
+        // Generate a unique salt
         let salt = SaltString::generate(&mut OsRng);
 
+        // Create the instance of the hashing algorithm
         let argon2 = Argon2::default();
 
+        // Do the hashing
         let text = text.as_bytes();
         Ok(argon2.hash_password(text, &salt)?.to_string())
     }
@@ -44,6 +48,7 @@ impl UnsavedUser {
     }
 }
 impl UnsavedModel<User> for UnsavedUser {
+    /// Saves a user to the database and returns an object based on the new user stored in the database
     fn save(self, connection: &mut PgConnection) -> QueryResult<User> {
         diesel::insert_into(users::dsl::users)
             .values(self)

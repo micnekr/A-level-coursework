@@ -32,30 +32,18 @@
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
   <script src="https://unpkg.com/react-bootstrap@next/dist/react-bootstrap.min.js" crossorigin=""></script>
   <script type="text/javascript" src="js/zxcvbn.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/dayOfYear.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/duration.js"></script>
+  <script type="text/javascript" src="js/helpers.js"></script>
   <script type="text/babel">
     'use strict';
+    // Load dayjs plugins
+    dayjs.extend(window.dayjs_plugin_dayOfYear);
     // Load all the component code via templating
     {% for component in components %}
     {{component}}
     {% endfor %}
-    // Helpers
-    // A fetch helper. `f` is short for `fetch`
-    function f(url, method, data) {
-      const body = method === "GET" ? undefined : JSON.stringify(data);
-      return fetch(url, {
-        method: method,
-        credentials: "same-origin", // only send cookies for same-origin requests
-        headers: {
-          "content-type": "application/json",
-          accept: "application/json",
-        },
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body
-      });
-    }
-
     // Load DOM
     // See react docs for more details
     const domContainer = document.querySelector('#_app');
