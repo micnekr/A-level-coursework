@@ -1,18 +1,17 @@
 use crate::{
     data::users::UnsavedUser,
     db::establish_connection,
-    page_template::create_page,
-    settings::{ALLOWED_ORIGIN, PASSWORD_HASH_LENGTH},
+    page_template::{create_page, create_session_protected_page},
+    settings::{DOMAIN, PASSWORD_HASH_LENGTH, PORT},
 };
-use actix_cors::Cors;
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
-use actix_web::{http::header, middleware, App, HttpServer};
+use actix_web::{cookie::Key, middleware, App, HttpServer};
 use diesel::PgConnection;
 use dotenvy::dotenv;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use page_template::ReactElement;
-use std::env;
-use std::sync::Mutex;
+use std::{env, fs::File};
+use std::{io::Read, sync::Mutex};
 
 pub mod data;
 pub mod db;
@@ -29,7 +28,7 @@ pub struct ServerState {
 async fn main() -> std::io::Result<()> {
     // Startup
     // Create a logger
-    env_logger::init_from_env(env_logger::Env::new().default_filter_or("debug"));
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
     // Find out the length of the hash in this representation
     let password_length = UnsavedUser::hash("")
@@ -51,13 +50,21 @@ async fn main() -> std::io::Result<()> {
         .expect("Could not locate the cert.pem file");
 
     // create the server
+    let allowed_origin = format!("{DOMAIN}:{PORT}");
     let server = HttpServer::new(|| {
         // Connect to the database using the URL in the .env file
         let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
         let connection = establish_connection(database_url);
 
         // Set up sessions
-        let session_secret_key = actix_web::cookie::Key::generate();
+
+        // Read the key file
+        let mut f = File::open("session_key.txt").expect("Could not open the session key file");
+        let mut raw_key = vec![];
+        f.read_to_end(&mut raw_key)
+            .expect("Could not read the session key");
+
+        let session_secret_key = Key::from(raw_key.as_slice());
 
         // Create server state
         let server_data = actix_web::web::Data::new(ServerState {
@@ -77,6 +84,8 @@ async fn main() -> std::io::Result<()> {
             // endpoints
             .service(endpoints::users::signup)
             .service(endpoints::users::login)
+            .service(endpoints::events::get_events)
+            .service(endpoints::events::create_event)
             // Serving files
             // Serve the static css and js files
             .service(actix_files::Files::new("/css", "public/css").show_files_listing())
@@ -103,9 +112,30 @@ async fn main() -> std::io::Result<()> {
                     ReactElement::COMPONENT("ErrorMessage"),
                 ],
             ))
+            .service(create_session_protected_page(
+                "Calendar",
+                "/",
+                &[
+                    ReactElement::PAGE("Calendar"),
+                    ReactElement::COMPONENT("Timetable"),
+                    ReactElement::COMPONENT("TimetableEvent"),
+                    ReactElement::COMPONENT("ErrorMessage"),
+                    ReactElement::COMPONENT("PageContainerBoxLarge"),
+                ],
+            ))
+            .service(create_session_protected_page(
+                "Create an Event",
+                "/create_event",
+                &[
+                    ReactElement::PAGE("CreateEvent"),
+                    ReactElement::COMPONENT("ErrorMessage"),
+                    ReactElement::COMPONENT("PageContainerBox"),
+                ],
+            ))
     })
     // set up openssl for use
-    .bind_openssl(ALLOWED_ORIGIN, ssl_builder)?;
+    .bind_openssl(allowed_origin.clone(), ssl_builder)?;
+    println!("Listening on {allowed_origin}");
 
     server.run().await
 }

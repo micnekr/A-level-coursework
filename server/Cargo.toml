@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 diesel = { version = "2.0.0", features = ["postgres"] }
+diesel-derive-enum = { version = "2.0.0-rc.0", features = ["postgres"] }
 dotenvy = "0.15"
 serde = { version = "1.0", features = ["derive"] }
 actix-web = { version = "4", features = ["openssl"] }
@@ -22,3 +23,4 @@ env_logger = "0.9.1"
 log = "0.4.17"
 derive_more = "0.99.17"
 actix-session = { version = "0.7.2", features = ["cookie-session"] }
+diesel_derives = "2.0.1"

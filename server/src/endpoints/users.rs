@@ -29,14 +29,14 @@ pub struct LoginRequest {
 pub async fn signup(
     req_body: Json<SignupRequest>,
     session: Session,
-    data: actix_web::web::Data<ServerState>,
+    server_state: actix_web::web::Data<ServerState>,
 ) -> Result<&'static str, EndpointError> {
     // Create a user with those details
     let unsaved_user = UnsavedUser::try_new(req_body.username.clone(), req_body.password.clone())
         .expect("Failed to create a user");
 
     // Get the connection from the mutex
-    let mut connection = data
+    let mut connection = server_state
         .connection
         .lock()
         .expect("Could not get the connection from ServerState");
@@ -74,10 +74,10 @@ pub async fn signup(
 pub async fn login(
     req_body: Json<LoginRequest>,
     session: Session,
-    data: actix_web::web::Data<ServerState>,
+    server_state: actix_web::web::Data<ServerState>,
 ) -> Result<&'static str, EndpointError> {
     // Get the connection from the mutex
-    let mut connection = data
+    let mut connection = server_state
         .connection
         .lock()
         .expect("Could not get the connection from ServerState");
