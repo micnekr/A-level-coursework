@@ -88,6 +88,7 @@ pub async fn signup(
                 Result::Err(EndpointError::InternalError)
             }
         }
+        // Set the user session
         Result::Ok(user) => {
             set_session(session, &user).expect("Could not serialise user");
             Result::Ok("Success!")
@@ -124,6 +125,7 @@ pub async fn login(
             ))
         }
         Option::Some(user) => {
+            // Set the user session
             set_session(session, &user).expect("Could not serialise user");
             Result::Ok("Success!")
         }

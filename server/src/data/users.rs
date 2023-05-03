@@ -34,11 +34,15 @@ pub struct User {
 }
 
 impl UnsavedUser {
+    /// creates a password hash for the user using the salt and the hashing algorithm
     pub fn hash(text: &str) -> password_hash::Result<String> {
+        // Generate a unique salt
         let salt = SaltString::generate(&mut OsRng);
 
+        // Create the instance of the hashing algorithm
         let argon2 = Argon2::default();
 
+        // Do the hashing
         let text = text.as_bytes();
         Ok(argon2.hash_password(text, &salt)?.to_string())
     }
@@ -52,6 +56,7 @@ impl UnsavedUser {
     }
 }
 impl UnsavedModel<User> for UnsavedUser {
+    /// Saves a user to the database and returns an object based on the new user stored in the database
     fn save(self, connection: &mut PgConnection) -> QueryResult<User> {
         diesel::insert_into(users::dsl::users)
             .values(self)
@@ -75,12 +80,15 @@ impl User {
         provided_password: String,
     ) -> Option<User> {
         use crate::schema::users::dsl::*;
+        // Find all the users by the username
+        // Note that we only expect one, so we pop once
         let user = users
             .filter(username.eq(provided_username))
             .load::<User>(connection)
             .expect("Error loading users")
             .pop();
 
+        // If the user was found
         if let Some(user) = user {
             // Hash the password
             let password_verifier = Argon2::default();
@@ -97,6 +105,7 @@ impl User {
             } else {
                 None
             }
+            // If no user was found in the database, fail
         } else {
             None
         }

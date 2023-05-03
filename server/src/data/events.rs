@@ -11,12 +11,14 @@ use super::{
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, diesel_derive_enum::DbEnum)]
 #[DieselTypePath = "crate::schema::sql_types::RecurrenceType"]
+/// A datatype that represents how often the activity repeats (e.g. weekly)
 pub enum RecurrenceType {
     Weekly,
     Once,
 }
 #[derive(Serialize, Deserialize, PartialEq, Debug, diesel_derive_enum::DbEnum)]
 #[DieselTypePath = "crate::schema::sql_types::VisibilityType"]
+/// A datatype that represents who can see the details of the event
 pub enum VisibilityType {
     Public,
     Private,
@@ -98,6 +100,7 @@ impl Event {
 }
 
 impl UnsavedModel<Event> for UnsavedEvent {
+    /// This saves the event "template" into the database and returns an event object from the database
     fn save(self, connection: &mut PgConnection) -> QueryResult<Event> {
         diesel::insert_into(events::dsl::events)
             .values(self)

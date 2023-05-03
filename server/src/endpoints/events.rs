@@ -35,6 +35,7 @@ pub async fn get_events(
 
     let events = Event::get_accepted_events_with_user(&mut connection, &user);
 
+    // If the events are found, send them to the frontend
     match events {
         Ok(events) => Ok(Json(GetEventsResponse { events })),
         Err(err) => {
