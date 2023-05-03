@@ -66,6 +66,7 @@ pub async fn add_friend(
 
     let friend_username = req_body.username.clone();
 
+    // Try to add the friend and record it to the database
     let result = Friendship::add_friend(&mut connection, &user, &friend_username);
     match result {
         Err(err) => {

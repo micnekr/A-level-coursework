@@ -57,6 +57,7 @@ pub async fn signup(
             is_special: true,
         };
 
+        // Save the group and the participant to the database
         let group = unsaved_group.save(connection)?;
         let participation = UnsavedGroupParticipant {
             participation_type: ParticipationType::Accepted,

@@ -41,6 +41,7 @@
     // Load plugins
     dayjs.extend(window.dayjs_plugin_dayOfYear);
 
+    // Load component code using templating
     {% for component in components %}
     {{component}}
     {% endfor %}

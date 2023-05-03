@@ -19,6 +19,7 @@ pub enum Notification {
 }
 
 impl Notification {
+    /// Get all notifications that belong to a user
     pub fn get_user_notifications(
         connection: &mut PgConnection,
         user: &User,
@@ -32,6 +33,7 @@ impl Notification {
                     .eq(user.id)
                     .and(groups_participants::participation_type.eq(ParticipationType::NoResponse)),
             )
+            // get the result from the database
             .select(groups::all_columns)
             .load::<Group>(connection)?;
 

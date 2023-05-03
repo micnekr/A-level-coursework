@@ -108,6 +108,7 @@ pub async fn create_event(
                 group_id,
             };
 
+            // Try to save it to the database
             match event.save(&mut connection) {
                 Ok(_) => Ok("Success!"),
                 Err(err) => {
