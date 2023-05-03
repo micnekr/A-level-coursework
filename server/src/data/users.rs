@@ -59,12 +59,15 @@ impl User {
         provided_password: String,
     ) -> Option<User> {
         use crate::schema::users::dsl::*;
+        // Find all the users by the username
+        // Note that we only expect one, so we pop once
         let user = users
             .filter(username.eq(provided_username))
             .load::<User>(connection)
             .expect("Error loading users")
             .pop();
 
+        // If the user was found
         if let Some(user) = user {
             // Hash the password
             let password_verifier = Argon2::default();
@@ -81,6 +84,7 @@ impl User {
             } else {
                 None
             }
+            // If no user was found in the database, fail
         } else {
             None
         }

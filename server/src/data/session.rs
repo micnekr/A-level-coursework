@@ -1,6 +1,10 @@
 use super::users::User;
 use actix_session::{Session, SessionInsertError};
 
+/// A macro that gets the user instance out of an API request
+/// It is designed to be used within an API endpoint
+/// The macro sends an error and returns from the function if no valid user
+/// can be found
 macro_rules! use_session {
     ($session: expr, $user_var: ident) => {
         use $crate::data::session::get_session;

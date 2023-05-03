@@ -91,6 +91,7 @@ async fn main() -> std::io::Result<()> {
             .service(actix_files::Files::new("/css", "public/css").show_files_listing())
             .service(actix_files::Files::new("/js", "public/js").show_files_listing())
             // Serve pages by constructing them out of their components
+            // Create a login page
             .service(create_page(
                 "Log in",
                 "/login",
@@ -100,6 +101,7 @@ async fn main() -> std::io::Result<()> {
                     ReactElement::COMPONENT("ErrorMessage"),
                 ],
             ))
+            // Create a signup page
             .service(create_page(
                 "Sign up",
                 "/signup",

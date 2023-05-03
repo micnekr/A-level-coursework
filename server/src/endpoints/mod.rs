@@ -19,6 +19,7 @@ impl error::ResponseError for EndpointError {
         HttpResponse::build(self.status_code()).body(self.to_string())
     }
 
+    /// State what HTTP response codes are to be used for each of these errors
     fn status_code(&self) -> StatusCode {
         match *self {
             EndpointError::InternalError => StatusCode::INTERNAL_SERVER_ERROR,
