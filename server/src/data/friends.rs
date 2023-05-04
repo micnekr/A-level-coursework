@@ -87,10 +87,12 @@ impl Friendship {
                 return Ok(FriendAddResult::AlreadyFriends);
             }
 
+            // Create a friendship relationship
             let friendship = UnsavedFrienship {
                 owner_id: friendship_owner.id,
                 friend_id: friend.id,
             };
+            // Try to save it; exit if fails
             friendship.save(connection)?;
 
             Ok(FriendAddResult::Success)
@@ -101,6 +103,7 @@ impl Friendship {
 }
 
 impl UnsavedModel<Friendship> for UnsavedFrienship {
+    /// Saves a friendship and returns the database object for the friendship
     fn save(self, connection: &mut PgConnection) -> QueryResult<Friendship> {
         diesel::insert_into(friendships::dsl::friendships)
             .values(self)

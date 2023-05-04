@@ -1,4 +1,5 @@
 -- Your SQL goes here
+-- The table which stores groups of users
 CREATE TABLE groups (
   id SERIAL PRIMARY KEY,
   is_special BOOLEAN NOT NULL, -- e.g. "myself" group, managed by the program and not the user

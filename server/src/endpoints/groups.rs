@@ -15,6 +15,8 @@ use crate::{
 
 use super::EndpointError;
 
+// these structs represent request and response data formats
+
 #[derive(Deserialize)]
 pub struct CreateGroupRequest {
     name: String,
@@ -76,6 +78,7 @@ pub async fn get_owned_groups_with_participants(
         })
     });
 
+    // Send an error to the client if unsuccessful
     match response {
         Ok(data) => Ok(Json(data)),
         Err(err) => {
@@ -103,12 +106,14 @@ pub async fn create_group(
 
     let CreateGroupRequest { name } = req_body.0;
 
+    // Create a new group
     let group = UnsavedGroup {
         name,
         owner_id: user.id,
         is_special: false,
     };
 
+    // Try to save it into the database
     let group = group.save(&mut connection);
 
     match group {
@@ -194,6 +199,7 @@ pub async fn rename_group(
 
     let update_result = Group::rename_group_by_id(&mut connection, group_id, &user, new_name);
 
+    // Send the error to the frontend if failed
     match update_result {
         Err(err) => {
             // Log the error
@@ -263,6 +269,7 @@ pub async fn reply_to_group_invitation(
         was_accepted,
         group_id,
     } = req_body.0;
+    // Convert the decision into the enum
     let decision = if was_accepted {
         ParticipationType::Accepted
     } else {

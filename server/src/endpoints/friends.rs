@@ -66,6 +66,7 @@ pub async fn add_friend(
 
     let friend_username = req_body.username.clone();
 
+    // Try to add the friend and record it to the database
     let result = Friendship::add_friend(&mut connection, &user, &friend_username);
     match result {
         Err(err) => {
@@ -73,6 +74,7 @@ pub async fn add_friend(
             log::error!("friendships.add_friend.save: {}", err);
             Result::Err(EndpointError::InternalError)
         }
+        // Send different error messages for different causes of failure
         Ok(result) => match result {
             FriendAddResult::TriedFriendThemselves => Err(EndpointError::BadClientData(
                 "You can not add yourself as a friend",

@@ -1,6 +1,10 @@
 use super::users::User;
 use actix_session::{Session, SessionInsertError};
 
+/// A macro that gets the user instance out of an API request
+/// It is designed to be used within an API endpoint
+/// The macro sends an error and returns from the function if no valid user
+/// can be found
 macro_rules! use_session {
     ($session: expr, $user_var: ident) => {
         use $crate::data::session::get_session;
@@ -21,19 +25,22 @@ macro_rules! use_session {
 // Export the macro
 pub(crate) use use_session;
 
-// Tries to get a user from a session
+/// Tries to get a user from a session
 pub fn get_session(session: Session) -> Option<User> {
+    // Try to get the user
     if let (Ok(Some(id)), Ok(Some(username)), Ok(Some(password_hash))) = (
         session.get("id"),
         session.get("username"),
         session.get("password_hash"),
     ) {
+        // If all the data can be extracted, create a user
         Some(User {
             id,
             username,
             password_hash,
         })
     } else {
+        // otherwise, we can not create a user
         None
     }
 }

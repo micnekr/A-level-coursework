@@ -20,6 +20,8 @@ pub mod page_template;
 pub mod schema;
 pub mod settings;
 
+/// A struct that contains the data about the state of the servserside code; it is passed onto the endpoints
+/// For example, most endpoints need access the database, and so need the connection to be stored here
 pub struct ServerState {
     pub connection: Mutex<PgConnection>,
 }
@@ -102,6 +104,7 @@ async fn main() -> std::io::Result<()> {
             .service(actix_files::Files::new("/js", "public/js").show_files_listing())
             .service(actix_files::Files::new("/img", "public/img").show_files_listing())
             // Serve pages by constructing them out of their components
+            // Create a login page
             .service(create_page(
                 "Log in",
                 "/login",
@@ -111,6 +114,7 @@ async fn main() -> std::io::Result<()> {
                     ReactElement::COMPONENT("ErrorMessage"),
                 ],
             ))
+            // Create a signup page
             .service(create_page(
                 "Sign up",
                 "/signup",

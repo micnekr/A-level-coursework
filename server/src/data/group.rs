@@ -103,6 +103,7 @@ impl Group {
         groups::table.find(group_id).first(connection).optional()
     }
 
+    /// Finds a group by group id and changes its name
     pub fn rename_group_by_id(
         connection: &mut PgConnection,
         group_id: i32,
@@ -114,6 +115,7 @@ impl Group {
                 // Only allow the owner edit the group
                 groups::owner_id.eq(user.id).and(groups::id.eq(group_id)),
             )
+            // Change the group name
             .set(groups::name.eq(new_name))
             .get_result(connection)
     }
@@ -143,16 +145,19 @@ impl Group {
     ) -> QueryResult<usize> {
         diesel::update(groups_participants::table)
             .filter(
+                // select that given group and user combination
                 groups_participants::group_id
                     .eq(group_id)
                     .and(groups_participants::participant_id.eq(user.id)),
             )
+            // Record the user's
             .set(groups_participants::participation_type.eq(decision))
             .execute(connection)
     }
 }
 
 impl UnsavedModel<Group> for UnsavedGroup {
+    /// Save the group and get database representation of a group
     fn save(self, connection: &mut PgConnection) -> QueryResult<Group> {
         diesel::insert_into(groups::dsl::groups)
             .values(self)
@@ -161,6 +166,7 @@ impl UnsavedModel<Group> for UnsavedGroup {
 }
 
 impl UnsavedModel<GroupParticipant> for UnsavedGroupParticipant {
+    /// Save the participation and get database representation of that relationship
     fn save(self, connection: &mut PgConnection) -> QueryResult<GroupParticipant> {
         diesel::insert_into(groups_participants::dsl::groups_participants)
             .values(self)
